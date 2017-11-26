@@ -59,7 +59,7 @@ alpha = 0.0005
 plt.plot(x[:,1], y, 'bo')
 
 # Initial theta.
-theta = np.array([1, 1])
+theta = np.ones(x.ndim)
 # Descent down
 theta = gradient_descent(x, y, alpha, theta, m, 40000)
 
