@@ -1,2 +1,2 @@
 # AIClub
-Repo for AIClub inside Abto Software
+Repo for Abto software AIClub meetings
