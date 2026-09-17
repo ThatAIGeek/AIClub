@@ -1,0 +1,1439 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Чотири способи обдурити себе</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Oswald:wght@500;600&display=swap">
+<style>
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+
+:root{
+  --bg:#E7EAEC; --surface:#FCFCFB; --surface-2:#EFF2F3; --sunk:#DFE4E7;
+  --ink:#141A20; --ink-2:#39434D; --muted:#68727E; --line:#C7CED4; --line-2:#DCE1E5;
+  --accent:#A8520C; --train:#2F6289; --val:#9A710D; --test:#5B3B70; --alarm:#A83620; --ok:#2C6349;
+  --tint-train:#DCE8F1; --tint-val:#F2E8CE; --tint-test:#E8DFF0; --tint-alarm:#F4DED8; --tint-ok:#D9E8E1;
+  --shadow:0 1px 1px rgba(20,26,32,.05), 0 10px 26px rgba(20,26,32,.07);
+  --bar:3.1rem;
+}
+
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1318; --surface:#161C23; --surface-2:#1C232B; --sunk:#10161C;
+    --ink:#E7ECF0; --ink-2:#C3CCD5; --muted:#8B96A3; --line:#2B343D; --line-2:#222A32;
+    --accent:#E0964B; --train:#78ADD8; --val:#D8AE55; --test:#B693D4; --alarm:#E27C5F; --ok:#6CB795;
+    --tint-train:#18293A; --tint-val:#2E2716; --tint-test:#26203A; --tint-alarm:#331C16; --tint-ok:#16291F;
+    --shadow:0 1px 1px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1318; --surface:#161C23; --surface-2:#1C232B; --sunk:#10161C;
+  --ink:#E7ECF0; --ink-2:#C3CCD5; --muted:#8B96A3; --line:#2B343D; --line-2:#222A32;
+  --accent:#E0964B; --train:#78ADD8; --val:#D8AE55; --test:#B693D4; --alarm:#E27C5F; --ok:#6CB795;
+  --tint-train:#18293A; --tint-val:#2E2716; --tint-test:#26203A; --tint-alarm:#331C16; --tint-ok:#16291F;
+  --shadow:0 1px 1px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.35);
+}
+
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,"Segoe UI",Roboto,sans-serif;
+  display:flex; flex-direction:column; -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%}
+
+/* ─────────── chrome ─────────── */
+.bar{
+  flex:0 0 auto; display:flex; align-items:center; gap:.9rem;
+  background:var(--surface); border-bottom:1px solid var(--line);
+  padding:.45rem clamp(16px,2.4vw,28px);
+  padding-top:calc(.45rem + env(safe-area-inset-top,0px));
+  min-height:var(--bar);
+}
+.bar .mark{
+  font-family:"IBM Plex Mono",monospace; font-size:.72rem; font-weight:600;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--accent); white-space:nowrap;
+}
+.bar .who{font-size:.78rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.bar .spring{flex:1 1 auto}
+.btn{
+  font:inherit; font-size:.76rem; color:var(--ink-2); background:var(--surface-2);
+  border:1px solid var(--line); border-radius:5px; padding:.28rem .6rem; cursor:pointer;
+}
+.btn:hover{background:var(--sunk); color:var(--ink)}
+.btn[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--surface)}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+.progress{flex:0 0 auto; height:3px; background:var(--line-2)}
+.progress i{display:block; height:100%; background:var(--accent); width:0; transition:width .18s ease}
+
+.deck{flex:1 1 auto; overflow-y:auto; overflow-x:hidden; scroll-behavior:smooth}
+
+.foot{
+  flex:0 0 auto; display:flex; align-items:center; gap:.7rem;
+  border-top:1px solid var(--line); background:var(--surface);
+  padding:.4rem clamp(16px,2.4vw,28px);
+  padding-bottom:calc(.4rem + env(safe-area-inset-bottom,0px));
+}
+.foot .count{font-family:"IBM Plex Mono",monospace; font-size:.76rem; color:var(--muted); font-variant-numeric:tabular-nums}
+.foot .hint{font-size:.72rem; color:var(--muted)}
+@media (max-width:620px){.foot .hint{display:none}}
+
+/* ─────────── slide frame ─────────── */
+.slide{
+  font-size:clamp(16px, calc(0.72vw + 0.95vh), 26px);
+  padding:clamp(1.1rem,3.4vh,2.4rem) clamp(16px,3.2vw,48px);
+  max-width:1340px; margin-inline:auto;
+  display:flex; flex-direction:column; justify-content:center; gap:1.15em;
+}
+.deck.deck-mode .slide{min-height:100%}
+.deck.list-mode .slide{
+  min-height:auto; border-bottom:1px solid var(--line); padding-block:2.6rem 3rem;
+  max-width:1340px;
+}
+.deck.list-mode .slide:last-child{border-bottom:0}
+
+.eyebrow{display:flex; align-items:baseline; gap:.7em; flex-wrap:wrap; margin-bottom:-.35em}
+.eyebrow b{
+  font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:.66em;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--accent);
+}
+.eyebrow span{font-family:"IBM Plex Mono",monospace; font-size:.64em; color:var(--muted)}
+
+h1,h2,h3{font-family:"Oswald","IBM Plex Sans",sans-serif; font-weight:500; margin:0; text-wrap:balance; line-height:1.12}
+h1{font-size:2.9em; letter-spacing:-.005em}
+h2{font-size:1.72em}
+h3{font-size:1.02em; font-weight:600; letter-spacing:.02em}
+p{margin:0; line-height:1.5; color:var(--ink-2); max-width:62ch}
+.lead{font-size:1.06em; color:var(--ink)}
+strong{color:var(--ink); font-weight:600}
+em{font-style:italic; color:var(--ink)}
+.mono{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums}
+a{color:var(--accent)}
+
+ul,ol{margin:0; padding-left:1.15em; display:flex; flex-direction:column; gap:.5em; line-height:1.45; color:var(--ink-2)}
+li::marker{color:var(--muted)}
+ul.tight,ol.tight{gap:.3em}
+
+/* ─────────── building blocks ─────────── */
+.cols{display:grid; grid-template-columns:repeat(auto-fit,minmax(255px,1fr)); gap:1em; align-items:start}
+.cols.c2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.cols.wide-left{grid-template-columns:1.35fr 1fr}
+@media (max-width:760px){.cols.wide-left{grid-template-columns:1fr}}
+
+.card{
+  background:var(--surface); border:1px solid var(--line); border-radius:8px;
+  padding:.9em 1em; display:flex; flex-direction:column; gap:.45em;
+}
+.card h3{color:var(--ink)}
+.card p,.card li{font-size:.9em}
+.card.flat{background:transparent; border-style:dashed}
+.card.bad{border-color:var(--alarm); background:var(--tint-alarm)}
+.card.good{border-color:var(--ok); background:var(--tint-ok)}
+
+.tag{
+  display:inline-block; font-family:"IBM Plex Mono",monospace; font-size:.62em; font-weight:600;
+  letter-spacing:.1em; text-transform:uppercase; padding:.18em .5em; border-radius:4px;
+  background:var(--sunk); color:var(--muted); white-space:nowrap;
+}
+.tag.t-train{background:var(--tint-train); color:var(--train)}
+.tag.t-val{background:var(--tint-val); color:var(--val)}
+.tag.t-test{background:var(--tint-test); color:var(--test)}
+.tag.t-alarm{background:var(--tint-alarm); color:var(--alarm)}
+.tag.t-ok{background:var(--tint-ok); color:var(--ok)}
+
+.src{font-size:.68em; color:var(--muted); line-height:1.4; font-family:"IBM Plex Mono",monospace}
+.src a{color:var(--muted); text-decoration-color:var(--line)}
+
+.rule{height:1px; background:var(--line); border:0; margin:0}
+
+.big{
+  font-family:"IBM Plex Mono",monospace; font-weight:600; font-variant-numeric:tabular-nums;
+  line-height:1; letter-spacing:-.02em;
+}
+
+/* fold strips — єдина колірна схема курсу */
+.legend{display:flex; gap:1em; flex-wrap:wrap; align-items:center; font-size:.72em; color:var(--muted)}
+.legend i{display:inline-block; width:1.5em; height:.62em; border-radius:2px; margin-right:.35em; vertical-align:baseline}
+.sw-train{background:var(--train)} .sw-val{background:var(--val)} .sw-test{background:var(--test)}
+.sw-leak{background:repeating-linear-gradient(45deg,var(--alarm) 0 4px,var(--tint-alarm) 4px 8px)}
+
+.folds{display:flex; flex-direction:column; gap:.34em}
+.foldrow{display:flex; align-items:center; gap:.7em}
+.foldrow > .lbl{
+  font-family:"IBM Plex Mono",monospace; font-size:.68em; color:var(--muted);
+  width:5.4em; flex:0 0 auto; text-align:right;
+}
+.bars{display:flex; gap:3px; flex:1 1 auto}
+.bars > i{
+  flex:1 1 0; height:1.45em; border-radius:3px; background:var(--train);
+  display:flex; align-items:center; justify-content:center;
+  font-family:"IBM Plex Mono",monospace; font-size:.6em; color:#fff; opacity:.96;
+}
+.bars > i.val{background:var(--val)}
+.bars > i.test{background:var(--test)}
+.bars > i.idle{background:var(--sunk); color:var(--muted)}
+.bars > i.leak{box-shadow:inset 0 0 0 2px var(--alarm); background:repeating-linear-gradient(45deg,var(--alarm) 0 5px,var(--train) 5px 10px)}
+
+/* confusion matrix — єдиний вигляд на весь курс */
+.cm{display:grid; grid-template-columns:auto auto auto; justify-content:start; gap:4px; font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums}
+.cm > div{padding:.55em .7em; border-radius:6px; background:var(--surface-2); border:1px solid var(--line-2)}
+.cm .hd{background:transparent; border:0; color:var(--muted); font-size:.68em; letter-spacing:.06em; text-transform:uppercase; display:flex; align-items:center}
+.cm .cell{display:flex; flex-direction:column; gap:.1em; min-width:6.2em}
+.cm .cell b{font-size:1.5em; font-weight:600; line-height:1}
+.cm .cell span{font-size:.64em; color:var(--muted); letter-spacing:.06em; text-transform:uppercase}
+.cm .tp{background:var(--tint-ok); border-color:var(--ok)} .cm .tp b{color:var(--ok)}
+.cm .fp{background:var(--tint-alarm); border-color:var(--alarm)} .cm .fp b{color:var(--alarm)}
+.cm .fn{background:var(--tint-val); border-color:var(--val)} .cm .fn b{color:var(--val)}
+.cm .tn b{color:var(--muted)}
+
+/* charts */
+.chart{width:100%; height:auto; max-height:min(46vh,400px); display:block; margin-inline:auto; color:var(--muted)}
+.chart .ax{stroke:var(--line); stroke-width:1}
+.chart .grid{stroke:var(--line-2); stroke-width:1; stroke-dasharray:3 4}
+.chart text{font-family:"IBM Plex Mono",monospace; font-size:11px; fill:var(--muted)}
+.chart text.big-lab{font-size:13px; fill:var(--ink-2)}
+.figframe{background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:.7em .8em; overflow-x:auto}
+
+/* case cards + reveal */
+.case{
+  background:var(--surface); border:1px solid var(--line); border-radius:8px;
+  padding:.7em .85em; display:flex; flex-direction:column; gap:.4em; font-size:.88em;
+}
+.case > .q{display:flex; gap:.6em; align-items:flex-start; color:var(--ink-2); line-height:1.4}
+.case > .q b{font-family:"IBM Plex Mono",monospace; color:var(--accent); flex:0 0 auto}
+.case .ans{
+  display:none; border-top:1px dashed var(--line); padding-top:.45em; font-size:.92em;
+  color:var(--ink-2); line-height:1.45;
+}
+.case.open .ans{display:block}
+.case .ans b{color:var(--alarm)}
+.reveal{align-self:flex-start; font:inherit; font-size:.72em; background:none; border:0; padding:0; color:var(--accent); cursor:pointer; text-decoration:underline dotted}
+
+/* pipeline flow */
+.flow{display:flex; align-items:center; gap:.45em; flex-wrap:wrap; font-size:.8em}
+.flow .step{
+  font-family:"IBM Plex Mono",monospace; background:var(--surface-2); border:1px solid var(--line);
+  border-radius:5px; padding:.3em .55em; white-space:nowrap;
+}
+.flow .step.hl{background:var(--tint-train); border-color:var(--train); color:var(--train)}
+.flow .arr{color:var(--muted)}
+
+.notes{
+  display:none; font-size:.76em; color:var(--muted); line-height:1.5;
+  border-left:2px solid var(--accent); padding-left:.8em; max-width:70ch;
+}
+.deck.notes-on .notes{display:block}
+
+.kv{display:grid; grid-template-columns:auto 1fr; gap:.3em .9em; font-size:.88em; align-items:baseline}
+.kv dt{font-family:"IBM Plex Mono",monospace; font-size:.85em; color:var(--muted); white-space:nowrap}
+.kv dd{margin:0; color:var(--ink-2)}
+
+table{border-collapse:collapse; width:100%; font-size:.82em}
+th,td{text-align:left; padding:.42em .6em; border-bottom:1px solid var(--line-2); vertical-align:top}
+th{color:var(--muted); font-weight:600; font-size:.9em; letter-spacing:.04em; text-transform:uppercase}
+td.mono{font-family:"IBM Plex Mono",monospace}
+.tablewrap{overflow-x:auto}
+
+@media print{.bar,.foot,.progress{display:none} .deck{overflow:visible} .slide{page-break-after:always}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important; scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header class="bar">
+  <span class="mark">Лекція 2</span>
+  <span class="who">Валідація моделей та методологія експерименту</span>
+  <span class="spring"></span>
+  <button class="btn" id="btn-notes" aria-pressed="false" title="Нотатки доповідача (N)">Нотатки</button>
+  <button class="btn" id="btn-mode" aria-pressed="false" title="Показати все списком (O)">Список</button>
+  <button class="btn" id="btn-theme" title="Тема (T)">Тема</button>
+</header>
+<div class="progress"><i id="prog"></i></div>
+<main class="deck deck-mode" id="deck">
+
+<!-- ══════════ БЛОК 0 · ХУК ══════════ -->
+
+<section class="slide" data-block="Лекція 2 · курс машинного навчання" data-time="80 хв">
+  <h1>Валідація моделей<br>та методологія експерименту</h1>
+  <p class="lead" style="max-width:46ch">Лекція&nbsp;1 відповіла, <strong>чим міряти</strong>. Ця відповідає, <strong>як організувати вимірювання, щоб число означало те, що ми думаємо</strong>. Лекція&nbsp;3 відповість, звідки помилка береться.</p>
+  <hr class="rule">
+  <div class="cols">
+    <div class="card flat">
+      <h3>Наскрізна рамка</h3>
+      <p>«The first principle is that you must not fool yourself&nbsp;— and you are the easiest person to fool.»<br><span class="mono" style="font-size:.85em">— R. Feynman, Caltech, 1974</span></p>
+    </div>
+    <div class="card flat">
+      <h3>Чотири способи обдурити себе</h3>
+      <ol class="tight" style="font-size:.9em">
+        <li>розбити дані не за тією одиницею;</li>
+        <li>пустити інформацію з майбутнього в минуле;</li>
+        <li>міряти метрикою, яка не чутлива до перекосу;</li>
+        <li>повірити в некалібрований score.</li>
+      </ol>
+    </div>
+    <div class="card flat">
+      <h3>Результати навчання</h3>
+      <p class="mono" style="font-size:.8em">РН5 · РН6 · ПРН3</p>
+      <p style="font-size:.86em">Перевіряються на захисті ЛР2 та на екзамені.</p>
+    </div>
+  </div>
+  <div class="notes">Хронометраж: 0&nbsp;— хук 6&nbsp;хв; 1&nbsp;— навіщо розбивати 8; 2&nbsp;— схеми CV 14; 3&nbsp;— витік 20; 4&nbsp;— дисбаланс 14; 5&nbsp;— калібрування 10; 6&nbsp;— офлайн vs ціль 5; 7&nbsp;— чек-ліст 3. Якщо пара 2×40&nbsp;— перерва після блоку 3.</div>
+</section>
+
+<section class="slide" data-block="Блок 0 · Хук" data-time="6 хв">
+  <h2>Два числа</h2>
+  <div class="cols c2" style="align-items:stretch">
+    <div class="card" style="justify-content:center;align-items:center;gap:.2em;padding-block:1.4em">
+      <span class="tag t-train">випадкове розбиття</span>
+      <span class="big" style="font-size:4.4em;color:var(--train)">0.94</span>
+      <span class="mono" style="font-size:.8em;color:var(--muted)">mAP</span>
+    </div>
+    <div class="card" style="justify-content:center;align-items:center;gap:.2em;padding-block:1.4em">
+      <span class="tag t-test">розбиття за місіями</span>
+      <span class="big" style="font-size:4.4em;color:var(--test)">0.41</span>
+      <span class="mono" style="font-size:.8em;color:var(--muted)">mAP</span>
+    </div>
+  </div>
+  <p class="lead"><strong>Одна модель. Один код. Один датасет.</strong> Різниця тільки в тому, як розбили дані.</p>
+  <p style="font-size:1.02em">Питання в зал: хто винен&nbsp;— модель, дані чи методологія?</p>
+  <div class="notes">Руки, не оцінюється. Дати 30–40 секунд на суперечку в залі. Правильна відповідь&nbsp;— методологія, і саме її ми весь семестр не вчимо окремо. Числа взяті як типова величина ефекту; задокументовані аналоги&nbsp;— на наступному слайді після кадрів.</div>
+</section>
+
+<section class="slide" data-block="Блок 0 · Хук" data-time="6 хв">
+  <h2>Чи це два незалежні приклади?</h2>
+  <div class="figframe">
+    <svg class="chart" viewBox="0 0 560 246" role="img" aria-label="Два сусідні кадри одного відео з різницею 33 мілісекунди">
+      <rect x="40" y="26" width="212" height="122" rx="6" style="fill:var(--sunk);stroke:var(--line)"/>
+      <path d="M40,112 H252" style="stroke:var(--line);stroke-width:1"/>
+      <path d="M52,112 L92,96 L132,106 L176,92 L228,104" style="fill:none;stroke:var(--muted);stroke-width:1.4;opacity:.7"/>
+      <rect x="146" y="88" width="20" height="14" rx="2" style="fill:var(--test);opacity:.85"/>
+      <rect x="138" y="80" width="36" height="30" rx="3" style="fill:none;stroke:var(--alarm);stroke-width:1.6"/>
+      <rect x="308" y="26" width="212" height="122" rx="6" style="fill:var(--sunk);stroke:var(--line)"/>
+      <path d="M308,112 H520" style="stroke:var(--line);stroke-width:1"/>
+      <path d="M318,112 L358,96 L398,106 L442,92 L494,104" style="fill:none;stroke:var(--muted);stroke-width:1.4;opacity:.7"/>
+      <rect x="417" y="88" width="20" height="14" rx="2" style="fill:var(--test);opacity:.85"/>
+      <rect x="409" y="80" width="36" height="30" rx="3" style="fill:none;stroke:var(--alarm);stroke-width:1.6"/>
+      <path d="M260,87 H300" style="stroke:var(--accent);stroke-width:1.6"/>
+      <path d="M300,87 l-7,-4 v8 z" style="fill:var(--accent)"/>
+      <text x="280" y="76" text-anchor="middle" style="fill:var(--accent);font-weight:600">33 мс</text>
+      <text x="146" y="168" text-anchor="middle">00:04:12.033</text>
+      <text x="414" y="168" text-anchor="middle">00:04:12.067</text>
+      <rect x="86" y="186" width="120" height="30" rx="5" style="fill:var(--tint-train);stroke:var(--train)"/>
+      <text x="146" y="205" text-anchor="middle" class="big-lab" style="fill:var(--train)">TRAIN</text>
+      <rect x="354" y="186" width="120" height="30" rx="5" style="fill:var(--tint-test);stroke:var(--test)"/>
+      <text x="414" y="205" text-anchor="middle" class="big-lab" style="fill:var(--test)">TEST</text>
+      <text x="280" y="236" text-anchor="middle" style="fill:var(--alarm)">одне відео, 30 fps, той самий борт, та сама ділянка</text>
+    </svg>
+  </div>
+  <p class="lead">Якщо один із цих кадрів у train, а другий у test&nbsp;— ви виміряли <strong>не узагальнення, а пам'ять</strong>.</p>
+  <p>Обіцянка лекції: після неї ви дивитеся на чужий результат і питаєте «а як ви розбивали?» <em>раніше</em>, ніж «а яка у вас архітектура?».</p>
+  <div class="notes">Тут же дати рамку всієї лекції: п'ять тем програми (розбиття, CV, витік, дисбаланс, калібрування) подаються не як окремі техніки, а як способи самообману і захист від них.</div>
+</section>
+
+<section class="slide" data-block="Блок 0 · Хук" data-time="6 хв">
+  <h2>Це не гіпотетичні числа</h2>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Задача</th><th>«Наївне» розбиття</th><th>Чесне розбиття</th><th>Одиниця незалежності</th></tr></thead>
+      <tbody>
+        <tr><td>Тип дрона за радіосигналом, DroneRF</td><td class="mono" style="color:var(--train)">macro-F1 0.74</td><td class="mono" style="color:var(--test)">0.46 <span style="color:var(--muted)">(рівень випадковості)</span></td><td>запис</td></tr>
+        <tr><td>Акустичне виявлення дрона, EchoHawk</td><td class="mono" style="color:var(--train)">P<sub>d</sub> 0.937 @ FAR 5 %</td><td class="mono" style="color:var(--test)">0.875</td><td>сесія запису</td></tr>
+        <tr><td>Пошук файлу з багом за текстом issue</td><td class="mono" style="color:var(--train)">76 % на SWE-bench Verified</td><td class="mono" style="color:var(--test)">53 % на інших репозиторіях</td><td>репозиторій</td></tr>
+        <tr><td>Класифікація Android-малварі</td><td class="mono" style="color:var(--train)">F1 до 0.99</td><td class="mono" style="color:var(--test)">суттєво нижче за часового розбиття</td><td>час появи зразка</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>У всіх чотирьох випадках падіння дає не інша модель, а інша <strong>процедура вимірювання</strong>.</p>
+  <p class="src">DroneRF: arXiv 2607.01025 · EchoHawk: arXiv 2606.29589 · SWE-Bench Illusion: arXiv 2506.12286 · TESSERACT: USENIX Security '19</p>
+  <div class="notes">Якщо аудиторія «оборонна»&nbsp;— затриматися на перших двох рядках. Якщо є люди з LLM-агентів&nbsp;— на третьому: там та сама помилка, тільки одиниця незалежності&nbsp;— репозиторій, а «витік» називається контамінацією бенчмарку.</div>
+</section>
+
+<!-- ══════════ БЛОК 1 ══════════ -->
+
+<section class="slide" data-block="Блок 1 · Навіщо розбивати" data-time="8 хв">
+  <h2>Емпіричний ризик vs істинний ризик</h2>
+  <div class="cols wide-left">
+    <div class="figframe">
+      <svg class="chart" viewBox="0 0 560 300" role="img" aria-label="Криві помилки на train і на test залежно від ємності моделі">
+        <path d="M60,30 V258 H530" class="ax" style="fill:none"/>
+        <path d="M74,86 C190,160 320,212 516,242" style="fill:none;stroke:var(--train);stroke-width:2.4"/>
+        <path d="M74,100 C150,168 200,198 244,201 C330,206 430,150 516,78" style="fill:none;stroke:var(--test);stroke-width:2.4"/>
+        <path d="M244,201 V258" class="grid"/>
+        <circle cx="244" cy="201" r="4.5" style="fill:var(--test)"/>
+        <path d="M470,236 V113" style="stroke:var(--accent);stroke-width:1.4;stroke-dasharray:4 3"/>
+        <path d="M470,113 l-4,7 h8 z M470,236 l-4,-7 h8 z" style="fill:var(--accent)"/>
+        <text x="478" y="178" style="fill:var(--accent)">розрив</text>
+        <text x="478" y="192" style="fill:var(--accent)">узагальнення</text>
+        <text x="250" y="232" style="fill:var(--train)" class="big-lab">помилка на train</text>
+        <text x="300" y="120" style="fill:var(--test)" class="big-lab">помилка на test</text>
+        <text x="244" y="274" text-anchor="middle">оптимум</text>
+        <text x="295" y="292" text-anchor="middle" class="big-lab">ємність моделі / кількість підганянь →</text>
+        <text x="24" y="150" transform="rotate(-90 24 150)" text-anchor="middle" class="big-lab">помилка</text>
+      </svg>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.8em">
+      <div class="card">
+        <h3>Головне твердження</h3>
+        <p>Помилка на train&nbsp;— <strong>зміщена, оптимістична</strong> оцінка істинного ризику. Зміщення росте з ємністю моделі й з кількістю разів, коли ви щось підганяли.</p>
+      </div>
+      <div class="card flat">
+        <p style="font-size:.9em">Ми ніколи не бачимо істинний ризик. Ми бачимо його <em>оцінку</em> на скінченній вибірці. Уся методологія&nbsp;— про те, щоб ця оцінка була незміщеною і щоб ми знали її дисперсію.</p>
+      </div>
+    </div>
+  </div>
+  <div class="notes">Не занурюватися в статистичне навчання. Достатньо: train error ↓ монотонно, test error має мінімум, розрив між ними&nbsp;— це те, що ми хочемо виміряти, а не сховати. Лекція 3 розкладе цей розрив на зсув і дисперсію.</div>
+</section>
+
+<section class="slide" data-block="Блок 1 · Навіщо розбивати" data-time="8 хв">
+  <h2>Три ролі вибірок</h2>
+  <div class="folds" style="font-size:1.05em">
+    <div class="foldrow">
+      <span class="lbl">дані</span>
+      <div class="bars">
+        <i style="flex:6">TRAIN · 60 %</i><i class="val" style="flex:2">VAL · 20 %</i><i class="test" style="flex:2">TEST · 20 %</i>
+      </div>
+    </div>
+  </div>
+  <div class="cols">
+    <div class="card"><span class="tag t-train">train</span><p><strong>Налаштовує параметри.</strong> Ваги, коефіцієнти, розбиття дерева. Дивимося скільки завгодно разів.</p></div>
+    <div class="card"><span class="tag t-val">validation</span><p><strong>Обирає гіперпараметри й модель.</strong> Глибину дерева, C, кількість компонент, поріг. Дивимося багато разів&nbsp;— і саме тому вона теж стає оптимістичною.</p></div>
+    <div class="card"><span class="tag t-test">test</span><p><strong>Дає ОДНУ незміщену оцінку.</strong> Дивимося один раз. Після рішення. Перед звітом.</p></div>
+  </div>
+  <p class="lead">Найчастіша помилка студентських робіт&nbsp;— <strong>злити val і test в одну вибірку</strong> і звітувати число, за яким же й обирали модель.</p>
+  <div class="notes">Ця колірна схема (train синій / val вохра / test сливовий) повертається в лекціях 4, 13 і 14. Попросити студентів запам'ятати саме її.</div>
+</section>
+
+<section class="slide" data-block="Блок 1 · Навіщо розбивати" data-time="8 хв">
+  <h2>Тестова вибірка&nbsp;— це одноразовий патрон</h2>
+  <p class="lead">Кожен погляд на тест витрачає його. Після третього «а давайте ще перевіримо на тесті» у вас <strong>друга валідаційна вибірка</strong>, а не тест.</p>
+  <div class="cols c2">
+    <div class="card bad">
+      <h3>Як це виглядає</h3>
+      <ul class="tight">
+        <li>«Спробували 30 конфігурацій, взяли найкращу за тестом.»</li>
+        <li>«Модель показала 0.78, ми трохи змінили аугментації&nbsp;— стало 0.81.»</li>
+        <li>«Поріг підібрали так, щоб на тесті вийшло красиво.»</li>
+      </ul>
+    </div>
+    <div class="card good">
+      <h3>Як має бути</h3>
+      <ul class="tight">
+        <li>Тест лежить в окремому файлі та не імпортується в ноутбук розробки.</li>
+        <li>Кількість звернень до тесту фіксується в журналі експериментів.</li>
+        <li>Витратили тест&nbsp;— збирайте новий або чесно звітуйте, скільки разів дивилися.</li>
+      </ul>
+    </div>
+  </div>
+  <p>Формально: обираючи найкраще з <span class="mono">m</span> конфігурацій за тією самою вибіркою, ви зміщуєте оцінку вгору приблизно на <span class="mono">σ·√(2 ln m)</span>. Для 30 конфігурацій і σ&nbsp;=&nbsp;2&nbsp;п.п. це вже близько <strong>5 п.п. «безкоштовного» приросту</strong>.</p>
+  <div class="notes">Оцінка максимуму m незалежних гаусівських величин. Не доводити&nbsp;— просто показати порядок. Це кількісна відповідь на питання «ну і що, я ж просто подивився».</div>
+</section>
+
+<section class="slide" data-block="Блок 1 · ПРН3" data-time="8 хв">
+  <h2>Шум оцінки: різниця 0.91 vs 0.89 — це не різниця</h2>
+  <div class="cols wide-left">
+    <div class="figframe">
+      <svg class="chart" viewBox="0 0 560 300" role="img" aria-label="Півширина 95-відсоткового довірчого інтервалу для accuracy 0.9 залежно від розміру тестової вибірки">
+        <path d="M70,40 V250 H520" class="ax" style="fill:none"/>
+        <path d="M70,185.4 H510" style="stroke:var(--alarm);stroke-width:1.4;stroke-dasharray:5 4"/>
+        <text x="514" y="182" style="fill:var(--alarm)">2 п.п.</text>
+        <polyline points="70,60 136,116 224,165 290,190 356,208 444,223 510,231" style="fill:none;stroke:var(--train);stroke-width:2.6"/>
+        <circle cx="136" cy="116" r="5.5" style="fill:var(--train)"/>
+        <text x="150" y="104" class="big-lab" style="fill:var(--train)">n = 200 → ±4,2 п.п.</text>
+        <text x="70" y="266" text-anchor="middle">100</text>
+        <text x="136" y="266" text-anchor="middle">200</text>
+        <text x="224" y="266" text-anchor="middle">500</text>
+        <text x="290" y="266" text-anchor="middle">1K</text>
+        <text x="356" y="266" text-anchor="middle">2K</text>
+        <text x="444" y="266" text-anchor="middle">5K</text>
+        <text x="510" y="266" text-anchor="middle">10K</text>
+        <text x="60" y="254" text-anchor="end">0</text>
+        <text x="60" y="189" text-anchor="end">2</text>
+        <text x="60" y="124" text-anchor="end">4</text>
+        <text x="60" y="60" text-anchor="end">6</text>
+        <text x="295" y="288" text-anchor="middle" class="big-lab">розмір тестової вибірки n (лог. шкала)</text>
+        <text x="22" y="145" transform="rotate(-90 22 145)" text-anchor="middle" class="big-lab">півширина 95 % ДІ, п.п.</text>
+      </svg>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.8em">
+      <div class="card">
+        <h3>На серветці</h3>
+        <p class="mono" style="font-size:.88em">1,96 · √(0,9 · 0,1 / 200) ≈ 0,042</p>
+        <p>Точність на тесті&nbsp;— біноміальна випадкова величина. При <span class="mono">n = 200</span> і accuracy 0.90 півширина 95&nbsp;% ДІ&nbsp;≈&nbsp;<strong>4,2 п.п.</strong></p>
+      </div>
+      <div class="card good">
+        <h3>Вимога до ЛР</h3>
+        <p>Кожна метрика в звіті&nbsp;— з довірчим інтервалом (біноміальний або бутстреп). Порівняння двох моделей без ДІ на захисті не приймається.</p>
+      </div>
+    </div>
+  </div>
+  <div class="notes">Щоб надійно побачити різницю 2 п.п., потрібно близько 2 000 прикладів у тесті. У більшості студентських ЛР тест&nbsp;— 200–400 прикладів. Отже, всі їхні «покращення» на 1–2 п.п.&nbsp;— шум. Сказати це прямо.</div>
+</section>
+
+<!-- ══════════ БЛОК 2 · СХЕМИ КРОС-ВАЛІДАЦІЇ ══════════ -->
+
+<section class="slide" data-block="Блок 2 · Схеми CV" data-time="14 хв">
+  <h2>Одне питання, з якого випливають усі схеми</h2>
+  <p class="lead" style="font-size:1.3em;color:var(--accent);max-width:24ch;font-family:'Oswald',sans-serif;font-weight:500">Що є одиницею незалежності у ваших даних?</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Схема</th><th>Коли</th><th>Одиниця незалежності</th></tr></thead>
+      <tbody>
+        <tr><td>Hold-out</td><td>багато даних, швидкий цикл</td><td>приклад</td></tr>
+        <tr><td>k-fold (k = 5 / 10)</td><td>стандарт, менша дисперсія оцінки</td><td>приклад</td></tr>
+        <tr><td>Stratified k-fold</td><td>рідкісні класи, малі вибірки</td><td>приклад зі збереженням пропорцій</td></tr>
+        <tr style="background:var(--tint-train)"><td><strong>Group k-fold / LOGO</strong></td><td>кадри з польоту, об'єкти, оператори, борти</td><td><strong>місія, борт, об'єкт, оператор</strong></td></tr>
+        <tr><td>Time-series split (rolling origin)</td><td>телеметрія, дрейф, малварь, ціни</td><td>час</td></tr>
+        <tr><td>Nested CV</td><td>одночасно підбираємо і звітуємо</td><td>два рівні</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Схема валідації&nbsp;— це <strong>не питання смаку і не питання бібліотеки</strong>. Це відповідь на питання, що саме корелює між вашими прикладами.</p>
+  <div class="notes">Не читати таблицю вголос. Показати й одразу перейти до розбору чотирьох рядків: k-fold, stratified, group, time-series. Nested&nbsp;— наприкінці блоку.</div>
+</section>
+
+<section class="slide" data-block="Блок 2 · Схеми CV" data-time="14 хв">
+  <h2>Hold-out і k-fold</h2>
+  <div class="legend"><span><i class="sw-train"></i>train</span><span><i class="sw-val"></i>validation</span><span><i class="sw-test"></i>test</span></div>
+  <div class="cols c2">
+    <div class="card">
+      <h3>Hold-out</h3>
+      <div class="folds">
+        <div class="foldrow"><span class="lbl">один поділ</span><div class="bars"><i style="flex:4">train</i><i class="val">val</i></div></div>
+      </div>
+      <p style="font-size:.88em">Дешево, швидко, але оцінка залежить від того, які саме приклади випали у val. При малих даних дисперсія оцінки величезна.</p>
+    </div>
+    <div class="card">
+      <h3>k-fold, k = 5</h3>
+      <div class="folds">
+        <div class="foldrow"><span class="lbl">фолд 1</span><div class="bars"><i class="val">val</i><i></i><i></i><i></i><i></i></div></div>
+        <div class="foldrow"><span class="lbl">фолд 2</span><div class="bars"><i></i><i class="val">val</i><i></i><i></i><i></i></div></div>
+        <div class="foldrow"><span class="lbl">фолд 3</span><div class="bars"><i></i><i></i><i class="val">val</i><i></i><i></i></div></div>
+        <div class="foldrow"><span class="lbl">фолд 4</span><div class="bars"><i></i><i></i><i></i><i class="val">val</i><i></i></div></div>
+        <div class="foldrow"><span class="lbl">фолд 5</span><div class="bars"><i></i><i></i><i></i><i></i><i class="val">val</i></div></div>
+      </div>
+      <p style="font-size:.88em">Кожен приклад рівно раз побував у val. Звітуємо середнє <strong>і стандартне відхилення</strong> по фолдах.</p>
+    </div>
+  </div>
+  <div class="card flat">
+    <h3>Правило вибору k</h3>
+    <p>Більший k&nbsp;— менше зміщення (train ближчий до повного датасету), але дорожче і <strong>сильніша кореляція між фолдами</strong>, тому σ по фолдах недооцінює справжню дисперсію. k = 5 або 10&nbsp;— компроміс, який працює. LOOCV&nbsp;— майже завжди надлишковий.</p>
+  </div>
+  <div class="notes">Підкреслити: σ по фолдах&nbsp;— це НЕ довірчий інтервал для узагальнення, бо фолди перетинаються по train. Це радше індикатор стабільності. Для ДІ&nbsp;— бутстреп на тесті.</div>
+</section>
+
+<section class="slide" data-block="Блок 2 · Схеми CV" data-time="14 хв">
+  <h2>Stratified k-fold потрібен не «для краси»</h2>
+  <div class="cols wide-left">
+    <div style="display:flex;flex-direction:column;gap:.8em">
+      <div class="card bad">
+        <h3>Звичайний k-fold при 2 % позитивів</h3>
+        <p>1 000 кадрів, 20 із ціллю. У 5-fold на фолд припадає в середньому 4 позитиви&nbsp;— але випадково легко отримати фолд із <strong>двома</strong>. Recall на такому фолді може бути 0.5 або 1.0, і це нічого не означає.</p>
+      </div>
+      <div class="card good">
+        <h3>Stratified k-fold</h3>
+        <p>Пропорція класів однакова в кожному фолді. Дисперсія оцінки падає, метрика стає інтерпретовною.</p>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Межа застосовності</h3>
+      <p>Стратифікація <strong>не рятує від групового витоку</strong>. Якщо ті самі 20 позитивів&nbsp;— це 20 кадрів одного об'єкта з одного прольоту, stratified k-fold сумлінно розкладе їх по всіх фолдах і тим <em>гарантує</em> витік.</p>
+      <p class="mono" style="font-size:.82em;color:var(--alarm)">StratifiedGroupKFold(...)</p>
+      <p style="font-size:.88em">У scikit-learn є комбінована схема. Саме її треба брати, коли в даних одночасно рідкісний клас і групи.</p>
+    </div>
+  </div>
+  <div class="notes">Тут природний місток до блоку 3: стратифікація&nbsp;— інструмент проти дисперсії, а не проти витоку. Студенти регулярно плутають ці дві задачі.</div>
+</section>
+
+<section class="slide" data-block="Блок 2 · Схеми CV" data-time="14 хв">
+  <h2>Group k-fold: центральна схема для вашої предметної області</h2>
+  <div class="legend"><span><i class="sw-train"></i>train</span><span><i class="sw-val"></i>validation</span><span><i class="sw-leak"></i>витік</span></div>
+  <div class="cols c2">
+    <div class="card bad">
+      <h3>Випадкове розбиття кадрів</h3>
+      <div class="folds">
+        <div class="foldrow"><span class="lbl">місія 1</span><div class="bars"><i class="leak"></i><i class="leak"></i><i class="val"></i><i class="leak"></i><i class="val"></i><i class="leak"></i></div></div>
+        <div class="foldrow"><span class="lbl">місія 2</span><div class="bars"><i class="val"></i><i class="leak"></i><i class="leak"></i><i class="val"></i><i class="leak"></i><i class="leak"></i></div></div>
+        <div class="foldrow"><span class="lbl">місія 3</span><div class="bars"><i class="leak"></i><i class="val"></i><i class="leak"></i><i class="leak"></i><i class="val"></i><i class="leak"></i></div></div>
+      </div>
+      <p style="font-size:.88em">Кожна місія по обидва боки межі. Модель бачила цей борт, це освітлення, цю ділянку місцевості й цей шум сенсора.</p>
+    </div>
+    <div class="card good">
+      <h3>Розбиття за місіями (GroupKFold)</h3>
+      <div class="folds">
+        <div class="foldrow"><span class="lbl">місія 1</span><div class="bars"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+        <div class="foldrow"><span class="lbl">місія 2</span><div class="bars"><i class="val"></i><i class="val"></i><i class="val"></i><i class="val"></i><i class="val"></i><i class="val"></i></div></div>
+        <div class="foldrow"><span class="lbl">місія 3</span><div class="bars"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+      </div>
+      <p style="font-size:.88em">Ціла місія цілком по один бік межі. Саме це відповідає питанню «як модель спрацює на <em>наступному</em> вильоті».</p>
+    </div>
+  </div>
+  <p class="lead">Групу визначає не файл, а <strong>джерело кореляції</strong>: один політ, один борт, одна ділянка місцевості, один день, один оператор, один тепловізор.</p>
+  <p class="src">Стандартна формула програми: розбиття польотних журналів за місіями, а не за кадрами.</p>
+  <div class="notes">Запитати зал: назвіть свою групу для своїх даних. Якщо студент не може назвати одиницю незалежності&nbsp;— він ще не розуміє задачу, а не методологію.</div>
+</section>
+
+<section class="slide" data-block="Блок 2 · Схеми CV" data-time="14 хв">
+  <h2>Груповий витік у реальних роботах</h2>
+  <div class="cols">
+    <div class="card">
+      <span class="tag t-alarm">радіочастотне виявлення</span>
+      <p>Неперервні записи нарізали на короткі сегменти й перемішали. Сусідні зрізи <em>одного</em> запису опинились і в train, і в test.</p>
+      <p class="mono" style="font-size:.95em">macro-F1 <span style="color:var(--train)">0.74</span> → <span style="color:var(--test)">0.46</span></p>
+      <p style="font-size:.86em">Після leave-one-recording-out на DroneRF розпізнавання типу дрона падає до рівня випадкового вгадування з двох класів. Абляція показала: майже все «покращення» давав саме сегментний витік.</p>
+      <p class="src">arXiv 2607.01025</p>
+    </div>
+    <div class="card">
+      <span class="tag t-alarm">акустичне виявлення</span>
+      <p>Той самий механізм на попередньо нарізаному публічному датасеті.</p>
+      <p class="mono" style="font-size:.95em">P<sub>d</sub>@FAR 5 %: <span style="color:var(--train)">0.937</span> → <span style="color:var(--test)">0.875</span><br>P<sub>d</sub>@FAR 1 %: <span style="color:var(--train)">0.796</span> → <span style="color:var(--test)">0.745</span></p>
+      <p style="font-size:.86em">Ефект менший, ніж у RF, але систематичний і вимірюваний. Автори роблять групування за сесією запису обов'язковою частиною пайплайну.</p>
+      <p class="src">arXiv 2606.29589</p>
+    </div>
+    <div class="card">
+      <span class="tag t-alarm">аеровідеоспостереження</span>
+      <p>У VisDrone сусідні кадри одного прольоту&nbsp;— майже дублікати. Випадкове розбиття лишає значну масу near-duplicate пар між train і val.</p>
+      <p style="font-size:.86em">Структурно-обізнане розбиття прибирає <strong>98,5 %</strong> цього перетину і робить валідацію справді out-of-distribution.</p>
+      <p class="src">arXiv 2607.02055</p>
+    </div>
+  </div>
+  <div class="notes">Три різні сенсори&nbsp;— РЧ, акустика, відео&nbsp;— і той самий механізм помилки. Це і є аргумент, чому питання «яка одиниця незалежності» універсальніше за будь-яку конкретну техніку.</div>
+</section>
+
+<section class="slide" data-block="Блок 2 · Схеми CV" data-time="14 хв">
+  <h2>Часове розбиття: rolling origin</h2>
+  <div class="legend"><span><i class="sw-train"></i>train</span><span><i class="sw-val"></i>validation</span><span style="color:var(--muted)"><i style="background:var(--sunk)"></i>ще не сталося</span></div>
+  <div class="folds">
+    <div class="foldrow"><span class="lbl">крок 1</span><div class="bars"><i></i><i></i><i class="val"></i><i class="idle"></i><i class="idle"></i><i class="idle"></i><i class="idle"></i></div></div>
+    <div class="foldrow"><span class="lbl">крок 2</span><div class="bars"><i></i><i></i><i></i><i class="val"></i><i class="idle"></i><i class="idle"></i><i class="idle"></i></div></div>
+    <div class="foldrow"><span class="lbl">крок 3</span><div class="bars"><i></i><i></i><i></i><i></i><i class="val"></i><i class="idle"></i><i class="idle"></i></div></div>
+    <div class="foldrow"><span class="lbl">крок 4</span><div class="bars"><i></i><i></i><i></i><i></i><i></i><i class="val"></i><i class="idle"></i></div></div>
+    <div class="foldrow"><span class="lbl">час →</span><div class="bars" style="opacity:.55"><i class="idle">т1</i><i class="idle">т2</i><i class="idle">т3</i><i class="idle">т4</i><i class="idle">т5</i><i class="idle">т6</i><i class="idle">т7</i></div></div>
+  </div>
+  <div class="cols c2">
+    <div class="card">
+      <h3>Коли обов'язково</h3>
+      <p>Телеметрія, прогноз відмов, виявлення малварі, будь-яка задача з дрейфом розподілу. Валідація має відтворювати те, що станеться в експлуатації: <strong>навчаємось на минулому, працюємо на майбутньому</strong>.</p>
+    </div>
+    <div class="card bad">
+      <h3>Ціна ігнорування</h3>
+      <p>У класифікації Android-малварі опубліковані F1 доходили до <span class="mono">0.99</span>. Після усунення часового зміщення (навчання лише на зразках, що з'явилися раніше за тестові) і просторового (реалістична пропорція малварі до чистих застосунків) результати виявились суттєво завищеними.</p>
+      <p class="src">TESSERACT, USENIX Security '19 · 129K застосунків за 3 роки</p>
+    </div>
+  </div>
+  <div class="notes">Додати: ковзні статистики й target encoding треба рахувати тільки з даних лівіше межі. Найчастіша технічна реалізація помилки&nbsp;— rolling mean, порахований по всьому ряду до розбиття.</div>
+</section>
+
+<section class="slide" data-block="Блок 2 · Схеми CV" data-time="14 хв">
+  <h2>Nested CV: коли ви одночасно підбираєте і звітуєте</h2>
+  <div class="cols wide-left">
+    <div class="card">
+      <div class="folds">
+        <div class="foldrow"><span class="lbl">зовнішній</span><div class="bars"><i class="test">оцінка</i><i style="flex:4">внутрішній цикл</i></div></div>
+        <div class="foldrow"><span class="lbl">внутр. 1</span><div class="bars" style="margin-left:19%"><i class="val">val</i><i></i><i></i><i></i></div></div>
+        <div class="foldrow"><span class="lbl">внутр. 2</span><div class="bars" style="margin-left:19%"><i></i><i class="val">val</i><i></i><i></i></div></div>
+        <div class="foldrow"><span class="lbl">внутр. 3</span><div class="bars" style="margin-left:19%"><i></i><i></i><i class="val">val</i><i></i></div></div>
+      </div>
+      <p style="font-size:.9em;margin-top:.6em"><strong>Внутрішній цикл</strong> обирає гіперпараметри. <strong>Зовнішній</strong> дає оцінку всієї процедури&nbsp;— разом із підбором. Повторити для кожного зовнішнього фолду.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.8em">
+      <div class="card bad">
+        <h3>Та сама метафора патрона</h3>
+        <p>Якщо ви тим самим фолдом обрали гіперпараметри і ним же відзвітували&nbsp;— це витік. Просто повільний і непомітний.</p>
+      </div>
+      <div class="card flat">
+        <h3>Коли цим можна не займатися</h3>
+        <p>Якщо у вас є окремий, жодного разу не торканий тест&nbsp;— nested CV не потрібен. Він потрібен тоді, коли даних мало й окремий тест ви дозволити собі не можете.</p>
+      </div>
+    </div>
+  </div>
+  <div class="notes">Вартість: k_зовн × k_внутр навчань. Для 5×5 це 25 моделей. Тому на практиці&nbsp;— або окремий заморожений тест, або nested CV на малих даних, але не «5-fold і звіт по ньому ж».</div>
+</section>
+
+<!-- ══════════ БЛОК 3 · ВИТІК ДАНИХ (ЯДРО) ══════════ -->
+
+<section class="slide" data-block="Блок 3 · Витік даних" data-time="20 хв">
+  <p class="mono" style="font-size:.8em;color:var(--accent);letter-spacing:.16em;text-transform:uppercase">Ядро лекції</p>
+  <h2 style="font-size:2.3em">Витік&nbsp;— це коли модель на навчанні бачить інформацію,<br>якої не буде в момент застосування</h2>
+  <div class="cols c2">
+    <div class="card">
+      <h3>Це не маргінальна помилка</h3>
+      <p>Систематичний огляд знайшов витік у <strong>294 роботах із 17 наукових дисциплін</strong>&nbsp;— від медицини до політології&nbsp;— і класифікував його у вісім типів.</p>
+      <p class="src">Kapoor &amp; Narayanan, Patterns, 2023</p>
+    </div>
+    <div class="card">
+      <h3>У безпеці&nbsp;— так само</h3>
+      <p>Аналіз 30 робіт із топових конференцій з комп'ютерної безпеки за 10 років:</p>
+      <dl class="kv">
+        <dt>92 %</dt><dd>оцінювання лише в лабораторних умовах</dd>
+        <dt>77 %</dt><dd>ігнорування базової частоти класу</dd>
+        <dt>69 %</dt><dd>невідповідні метрики</dd>
+        <dt>69 %</dt><dd>зміщення вибірки</dd>
+      </dl>
+      <p class="src">Arp et al., USENIX Security '22</p>
+    </div>
+  </div>
+  <p class="lead">Це не «студентська» помилка. Це <strong>норма галузі</strong>, поки хтось свідомо не будує процедуру проти неї.</p>
+  <div class="notes">Тут ставиться емоційна ставка блоку: якщо 77 % робіт у безпеці ігнорують базову частоту, то ваша інтуїція «ну в мене ж усе ок» нічого не варта. Потрібна процедура, а не інтуїція.</div>
+</section>
+
+<section class="slide" data-block="Блок 3 · Витік даних" data-time="20 хв">
+  <h2>Таксономія: шість місць, де це стається</h2>
+  <div class="cols" style="gap:.75em">
+    <div class="card"><span class="tag t-alarm">тип 1</span><h3>Ціль просочилась в ознаки</h3><p>Ознака порахована постфактум&nbsp;— вона існує тільки тому, що подія вже сталася.</p></div>
+    <div class="card"><span class="tag t-alarm">тип 2</span><h3>Препроцесинг по всьому датасету</h3><p>Scaler, PCA, імпутація, відбір ознак «підглянули» статистики тесту.</p></div>
+    <div class="card"><span class="tag t-alarm">тип 3</span><h3>Дублікати й майже-дублікати</h3><p>Сусідні кадри, аугментації оригіналу, той самий об'єкт під іншим ракурсом.</p></div>
+    <div class="card"><span class="tag t-alarm">тип 4</span><h3>Груповий витік</h3><p>Той самий борт, політ, оператор, місцевість по різні боки розбиття.</p></div>
+    <div class="card"><span class="tag t-alarm">тип 5</span><h3>Часовий витік</h3><p>Перемішали ряд; ковзні статистики через межу; target encoding без out-of-fold.</p></div>
+    <div class="card"><span class="tag t-alarm">тип 6</span><h3>Мета-витік і хибна кореляція</h3><p>Багаторазовий підбір на тесті; Clever Hans&nbsp;— модель вчить умови зйомки, а не ціль.</p></div>
+  </div>
+  <p>Типи 1–2 ви створюєте <em>кодом</em>. Типи 3–5 ви успадковуєте <em>від даних</em>. Тип 6 ви створюєте <em>власною поведінкою дослідника</em>.</p>
+  <div class="notes">Цей поділ на три походження&nbsp;— найкорисніше, що студент може винести зі слайда. Від нього залежить і лікування: код лікується Pipeline, дані&nbsp;— схемою розбиття, поведінка&nbsp;— дисципліною і журналом експериментів.</div>
+</section>
+
+<section class="slide" data-block="Блок 3 · Тип 1" data-time="20 хв">
+  <h2>Ціль просочилась в ознаки</h2>
+  <div class="cols wide-left">
+    <div class="card bad">
+      <h3>Прогноз відмови двигуна за місію</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Ознака</th><th>Вердикт</th></tr></thead>
+          <tbody>
+            <tr><td>середня температура на 10-й хвилині</td><td style="color:var(--ok)">чисто</td></tr>
+            <tr><td>рівень вібрації, вікно 60 с</td><td style="color:var(--ok)">чисто</td></tr>
+            <tr><td class="mono">кількість перезапусків двигуна за місію</td><td style="color:var(--alarm)"><strong>витік</strong></td></tr>
+            <tr><td class="mono">час до посадки</td><td style="color:var(--alarm)"><strong>витік</strong></td></tr>
+            <tr><td class="mono">код завершення місії</td><td style="color:var(--alarm)"><strong>витік</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.8em">
+      <div class="card">
+        <h3>Тест на одному питанні</h3>
+        <p style="font-size:1.02em"><strong>Чи буде ця ознака доступна в момент, коли модель має дати відповідь?</strong></p>
+        <p>«Кількість перезапусків за місію» відома тільки після місії. А прогноз потрібен <em>під час</em> місії.</p>
+      </div>
+      <div class="card flat">
+        <h3>Типові джерела</h3>
+        <ul class="tight" style="font-size:.9em">
+          <li>агрегати «за весь період», де період включає момент події;</li>
+          <li>поля, які заповнює оператор <em>після</em> інциденту;</li>
+          <li>ID, що зростає з часом і корелює з міткою;</li>
+          <li>статус у CRM/журналі, оновлений постфактум.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="notes">Практичний прийом: для кожної ознаки записати часову мітку, коли вона стає відомою, і порівняти з часовою міткою предиктивного рішення. Якщо колонки «коли відомо» немає&nbsp;— це вже червоний прапорець.</div>
+</section>
+
+<section class="slide" data-block="Блок 3 · Тип 2" data-time="20 хв">
+  <h2>Препроцесинг, що підглянув у тест</h2>
+  <div class="card bad">
+    <h3>Неправильно</h3>
+    <div class="flow">
+      <span class="step">увесь датасет</span><span class="arr">→</span>
+      <span class="step">StandardScaler.fit</span><span class="arr">→</span>
+      <span class="step">PCA.fit</span><span class="arr">→</span>
+      <span class="step">SMOTE</span><span class="arr">→</span>
+      <span class="step" style="border-color:var(--alarm);color:var(--alarm)">train_test_split</span>
+    </div>
+    <p style="font-size:.9em">Середнє, дисперсія, головні компоненти, межі викидів, словник токенів&nbsp;— усе це <strong>параметри, вивчені з тесту</strong>. Модель отримала інформацію про тест ще до того, як побачила перший приклад.</p>
+  </div>
+  <div class="card good">
+    <h3>Правильно</h3>
+    <div class="flow">
+      <span class="step" style="border-color:var(--ok);color:var(--ok)">розбиття за групою</span><span class="arr">→</span>
+      <span class="step hl">Pipeline.fit(train фолду)</span><span class="arr">→</span>
+      <span class="step">Pipeline.transform(val фолду)</span><span class="arr">→</span>
+      <span class="step">метрика</span>
+    </div>
+    <p style="font-size:.9em">Усе, що має <span class="mono">.fit()</span>, живе всередині <span class="mono">Pipeline</span> і навчається <strong>на кожному тренувальному фолді окремо</strong>.</p>
+  </div>
+  <p class="lead" style="color:var(--alarm)">Пряма зв'язка з ЛР1: видалення викидів по всьому датасету&nbsp;— це теж витік.</p>
+  <div class="notes">Перелічити повний список «підглядачів»: масштабування, PCA, імпутація пропусків, відбір ознак за кореляцією з ціллю, побудова словника/TF-IDF, кластеризація для ознак, обрізання викидів, SMOTE. Усі вони мають fit.</div>
+</section>
+
+<section class="slide" data-block="Блок 3 · Тип 3" data-time="20 хв">
+  <h2>Дублікати й майже-дублікати</h2>
+  <div class="cols">
+    <div class="card"><h3>Сусідні кадри</h3><p>30 fps означає, що 30 «різних прикладів» на секунду&nbsp;— це один приклад із шумом сенсора.</p></div>
+    <div class="card"><h3>Аугментації оригіналу</h3><p>Поворот, кроп і оригінал по різні боки розбиття&nbsp;— класика. Аугментувати можна <strong>тільки після</strong> розбиття і тільки train.</p></div>
+    <div class="card"><h3>Той самий об'єкт</h3><p>Одна одиниця техніки, знята з кількох ракурсів у різні дні, дає «різні» приклади, які модель впізнає за деталями, а не за класом.</p></div>
+    <div class="card"><h3>Перевипуски того самого зразка</h3><p>У кіберзадачах&nbsp;— перепаковані варіанти одного сімейства малварі; у текстових&nbsp;— передруки того самого документа.</p></div>
+  </div>
+  <div class="card flat">
+    <h3>Як ловити</h3>
+    <p>Перцептивний хеш або ембединг + поріг косинусної близькості між train і test; для тексту&nbsp;— n-грамний перетин; для сигналів&nbsp;— належність до одного неперервного запису. Знайдені пари не «видаляють обережно», а <strong>переносять цілою групою</strong> в один бік розбиття.</p>
+  </div>
+  <div class="notes">Числа з блоку 2 сюди ж: у VisDrone структурно-обізнане розбиття прибрало 98,5 % near-duplicate перетину. Тобто в наївному варіанті цього перетину було стільки, що він і робив метрику.</div>
+</section>
+
+<section class="slide" data-block="Блок 3 · Тип 5" data-time="20 хв">
+  <h2>Часовий витік і його близнюк у світі LLM</h2>
+  <div class="cols c2">
+    <div class="card">
+      <h3>Класичний вигляд</h3>
+      <ul class="tight">
+        <li>перемішали часовий ряд перед розбиттям;</li>
+        <li>ковзне середнє / лаг-ознаки пораховані через межу розбиття;</li>
+        <li>target encoding без out-of-fold схеми;</li>
+        <li>нормалізація за статистиками всього періоду, включно з майбутнім.</li>
+      </ul>
+      <p style="font-size:.88em">Наслідок завжди однаковий: офлайн-метрика чудова, у продакшені модель деградує з першого тижня.</p>
+    </div>
+    <div class="card">
+      <h3>Контамінація бенчмарку</h3>
+      <p>Найчистіший експеримент на цю тему: GPT-4 на найлегших задачах Codeforces розв'язала <strong>10 з 10</strong> задач, опублікованих до межі навчальних даних, і <strong>0 з 10</strong> задач, опублікованих після неї.</p>
+      <p style="font-size:.88em">Це не «модель погіршилась». Це вимірювання показало, що частина результату була пам'яттю, а не міркуванням&nbsp;— рівно як сусідні кадри в train і test.</p>
+      <p class="src">H. He, 2023 · межа даних GPT-4 — вересень 2021</p>
+    </div>
+  </div>
+  <p class="lead">Правило однакове для телеметрії й для LLM-агента: <strong>межа розбиття має бути межею в часі</strong>, і про неї треба знати, де вона.</p>
+  <div class="notes">Якщо хтось питає про агентів: для агентних бенчмарків це називається contamination, і практичний захист той самий&nbsp;— held-out задачі, створені після межі даних моделі, плюс перевірка на зовнішніх репозиторіях.</div>
+</section>
+
+<section class="slide" data-block="Блок 3 · Тип 6" data-time="20 хв">
+  <h2>Clever Hans: модель вчить умови зйомки, а не ціль</h2>
+  <div class="cols">
+    <div class="card bad">
+      <h3>Легенда</h3>
+      <p>«Нейромережа навчилась відрізняти танки, бо всі кадри з танками зняли в хмарну погоду.» Історія ходить із 1980-х, першоджерело так і не знайдено&nbsp;— її ретельно розбирали й дійшли висновку, що це <strong>міська легенда</strong>.</p>
+      <p class="src">gwern.net/tank</p>
+    </div>
+    <div class="card">
+      <h3>Задокументований випадок</h3>
+      <p>MSTAR&nbsp;— базовий датасет радіолокаційного розпізнавання цілей. Зйомка велася в обмежених умовах, і <strong>фон кожного класу корелює з класом</strong>. Мережі частково класифікують ціль за характеристиками підстильної поверхні; висока частка правильних відповідей утримується навіть тоді, коли самої цілі в кадрі немає.</p>
+      <p class="src">arXiv 2304.00668 · arXiv 2304.01747</p>
+    </div>
+    <div class="card">
+      <h3>Мета-витік</h3>
+      <p>Модель, яка визначає файл із багом <em>лише за текстом issue</em>, без доступу до структури репозиторію: <span class="mono">76 %</span> на SWE-bench Verified і <span class="mono">53 %</span> на репозиторіях поза бенчмарком.</p>
+      <p style="font-size:.86em">Різниця&nbsp;— це і є частка «пам'яті», яку бенчмарк зараховував як уміння.</p>
+      <p class="src">arXiv 2506.12286</p>
+    </div>
+  </div>
+  <p class="lead">Мораль не в тому, що моделі дурні. У тому, що <strong>модель завжди знаходить найдешевший спосіб розділити вибірку</strong>, і ваш обов'язок&nbsp;— зробити так, щоб найдешевшим був правильний.</p>
+  <div class="notes">Навмисно показати легенду і задокументований випадок поруч: студенти люблять переказувати історію про танки. Скажіть прямо: посилатися треба на MSTAR, а не на анекдот. Це також урок про перевірку джерел.</div>
+</section>
+
+<section class="slide" data-block="Блок 3 · Інтерактив" data-time="4 хв">
+  <h2>Знайди витік</h2>
+  <p style="font-size:.95em">Картки A / B / C або Mentimeter. Після кожного кейсу&nbsp;— 20 секунд розбору.</p>
+  <div class="cols c2" style="gap:.7em">
+    <div class="case"><div class="q"><b>1</b><span>12 000 кадрів із 40 польотів, випадкове розбиття 80/20, mAP 0.94.</span></div><button class="reveal" type="button">показати розбір</button><div class="ans"><b>Груповий витік (тип 4).</b> Одиниця незалежності&nbsp;— політ, а не кадр. Лікування: GroupKFold за <span class="mono">mission_id</span>. Очікуване падіння&nbsp;— у рази, не на відсотки.</div></div>
+    <div class="case"><div class="q"><b>2</b><span>StandardScaler + PCA застосували до всієї матриці ознак, потім розбили.</span></div><button class="reveal" type="button">показати розбір</button><div class="ans"><b>Витік через препроцесинг (тип 2).</b> Компоненти й статистики вивчені з тесту. Лікування: обидва кроки всередину <span class="mono">Pipeline</span>, fit&nbsp;— лише на train фолду.</div></div>
+    <div class="case"><div class="q"><b>3</b><span>Серед ознак для прогнозу відмови&nbsp;— «кількість перезапусків двигуна за місію».</span></div><button class="reveal" type="button">показати розбір</button><div class="ans"><b>Ціль в ознаках (тип 1).</b> Ознака відома тільки після завершення місії, тобто після події, яку прогнозуємо. Лікування: перерахувати як агрегат у вікні до моменту прогнозу.</div></div>
+    <div class="case"><div class="q"><b>4</b><span>Зробили SMOTE, потім 5-fold CV, recall 0.99.</span></div><button class="reveal" type="button">показати розбір</button><div class="ans"><b>Витік через ресемплінг (тип 2 + тип 3).</b> Синтетичні позитиви породжені з прикладів, що потрапили у val. Лікування: SMOTE тільки всередині фолду, через <span class="mono">imblearn.Pipeline</span>.</div></div>
+    <div class="case"><div class="q"><b>5</b><span>Порівняли 30 конфігурацій на тесті, взяли найкращу, її й записали у звіт.</span></div><button class="reveal" type="button">показати розбір</button><div class="ans"><b>Мета-витік (тип 6).</b> Тест став валідацією. Очікуване завищення для 30 спроб і σ = 2 п.п.&nbsp;— близько 5 п.п. Лікування: окрема валідація або nested CV, тест&nbsp;— один раз.</div></div>
+    <div class="case"><div class="q"><b>6</b><span>Усі кадри з цілями зняті у червні, усі фонові&nbsp;— у грудні.</span></div><button class="reveal" type="button">показати розбір</button><div class="ans"><b>Хибна кореляція, Clever Hans (тип 6).</b> Модель вчить пору року, температуру сцени й gain сенсора. Лікування: збалансувати умови зйомки між класами; перевірити, чи класифікується клас за самим лише фоном.</div></div>
+  </div>
+  <div class="notes">Натисніть R, щоб розкрити всі розбори одразу. Кейси 1 і 6&nbsp;— найважливіші, на них варто витратити більше часу, якщо група відповідає швидко.</div>
+</section>
+
+<section class="slide" data-block="Блок 3 · Діагностика" data-time="20 хв">
+  <h2>Червоні прапорці</h2>
+  <div class="cols">
+    <div class="card"><span class="tag t-alarm">1</span><h3>Неправдоподібно висока метрика</h3><p>Якщо ваш результат помітно кращий за найкращий опублікований на цій задачі&nbsp;— спочатку шукайте витік, потім радійте.</p></div>
+    <div class="card"><span class="tag t-alarm">2</span><h3>Одна ознака домінує</h3><p>У feature importance одна ознака забирає більшість внеску. Майже завжди це або ID, або постфактум-поле.</p></div>
+    <div class="card"><span class="tag t-alarm">3</span><h3>Майже нульова дисперсія між фолдами</h3><p>Реальні фолди відрізняються. Якщо σ ≈ 0, фолди бачать те саме&nbsp;— тобто вони не незалежні.</p></div>
+    <div class="card"><span class="tag t-alarm">4</span><h3>Розрив між офлайном і полем</h3><p>Найдорожчий спосіб дізнатися про витік. Саме тому три попередні прапорці варто перевіряти раніше.</p></div>
+  </div>
+  <div class="card flat">
+    <h3>Найдешевша перевірка з усіх</h3>
+    <p>Перемішайте мітки та навчіть ту саму модель тим самим кодом. Метрика має впасти до випадкової. Якщо не впала&nbsp;— у вашому пайплайні є канал, яким інформація тече повз ознаки.</p>
+  </div>
+  <div class="notes">Label-shuffle тест варто зробити обов'язковою клітинкою в шаблоні ЛР. Він ловить майже всі реалізаційні витоки за одну хвилину машинного часу.</div>
+</section>
+
+<section class="slide" data-block="Блок 3 · Лікування" data-time="20 хв">
+  <h2>Лікування, яке я вимагатиму в ЛР</h2>
+  <div class="cols c2">
+    <div class="card good">
+      <h3>1 · Усе перетворення&nbsp;— всередині Pipeline</h3>
+      <p>Усе, що має <span class="mono">.fit()</span>, навчається на кожному тренувальному фолді окремо. Ніяких «підготували дані, потім розбили».</p>
+      <h3 style="margin-top:.5em">2 · Розбиття за групою</h3>
+      <p>Група названа явно й записана в звіті: місія, борт, об'єкт, оператор, день.</p>
+    </div>
+    <div class="card good">
+      <h3>3 · Тест заморожений</h3>
+      <p>Окремий файл, окремий каталог, не імпортується під час розробки. Кількість звернень&nbsp;— у журналі.</p>
+      <h3 style="margin-top:.5em">4 · Хеш-розбиття за ідентифікатором групи</h3>
+      <p>Приналежність до фолду&nbsp;— детермінована функція від <span class="mono">mission_id</span>, а не від випадкового сіду. Тоді при доливанні даних старі приклади не перестрибують межу.</p>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Демонстрація (ноутбук, наживо)</h3>
+    <div class="flow">
+      <span class="step">train_test_split(shuffle=True)</span><span class="arr">→</span><span class="step" style="border-color:var(--train);color:var(--train)">≈ 0.95</span>
+      <span class="arr" style="margin-left:.8em">|</span>
+      <span class="step">GroupKFold(groups=mission_id)</span><span class="arr">→</span><span class="step" style="border-color:var(--test);color:var(--test)">≈ 0.6</span>
+    </div>
+    <p style="font-size:.88em">Третя клітинка: <span class="mono">StandardScaler + PCA</span> до розбиття і після&nbsp;— різниця в метриці на тих самих даних.</p>
+  </div>
+  <div class="notes">Показувати вживу, не слайдом: ефект сильніший, коли число змінюється на очах. Тримати ноутбук відкритим заздалегідь, щоб не витрачати час на запуск.</div>
+</section>
+
+<!-- ══════════ БЛОК 4 · НЕЗБАЛАНСОВАНІ КЛАСИ ══════════ -->
+
+<section class="slide" data-block="Блок 4 · Дисбаланс" data-time="14 хв">
+  <h2>Проблема не в дисбалансі як такому</h2>
+  <p class="lead">Сам по собі перекіс 1:99 не ламає нічого. Ламають <strong>чотири речі, які з ним приходять</strong>.</p>
+  <div class="cols">
+    <div class="card"><span class="tag">1</span><h3>Невідповідна метрика</h3><p>Accuracy 0.99 при 1 % позитивів дає константний класифікатор «нічого немає». Ви виміряли базову частоту, а не модель.</p></div>
+    <div class="card"><span class="tag">2</span><h3>Невідповідний поріг</h3><p>Стандартні 0.5 нічим не обґрунтовані. Поріг&nbsp;— окреме рішення, яке майже ніхто не ухвалює свідомо.</p></div>
+    <div class="card"><span class="tag">3</span><h3>Мала кількість позитивів</h3><p>20 позитивів на весь датасет означають дисперсію оцінки, за якої будь-яке порівняння моделей безглузде.</p></div>
+    <div class="card"><span class="tag">4</span><h3>Асиметрична ціна помилок</h3><p>Пропущена ціль і хибна тривога коштують різного. Метрика, яка їх зрівнює, оптимізує не те.</p></div>
+  </div>
+  <p>Тому «боротьба з дисбалансом» через ресемплінг&nbsp;— зазвичай відповідь не на ту проблему. Спершу з'ясуйте, яка з чотирьох у вас.</p>
+  <div class="notes">Ця теза ламає очікування: студенти приходять із думкою «дисбаланс → SMOTE». Показати, що в трьох випадках із чотирьох SMOTE не допоможе взагалі.</div>
+</section>
+
+<section class="slide" data-block="Блок 4 · Розрахунок у залі" data-time="3 хв">
+  <h2>Порахуйте самі: 10 000 кадрів, цілі в 1 %</h2>
+  <p>Модель: <span class="mono">recall = 0,90</span>, <span class="mono">FPR = 0,05</span>. Скільки сповіщень отримає оператор і скільки з них будуть хибними?</p>
+  <div class="cols wide-left" style="align-items:center">
+    <div class="cm">
+      <div class="hd"></div><div class="hd">прогноз: ціль</div><div class="hd">прогноз: фон</div>
+      <div class="hd">є ціль (100)</div>
+      <div class="cell tp"><b>90</b><span>TP</span></div>
+      <div class="cell fn"><b>10</b><span>FN</span></div>
+      <div class="hd">немає (9 900)</div>
+      <div class="cell fp"><b>495</b><span>FP</span></div>
+      <div class="cell tn"><b>9 405</b><span>TN</span></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.7em">
+      <div class="card bad">
+        <h3>Precision</h3>
+        <p class="mono" style="font-size:1.05em">90 / (90 + 495) = <span class="big" style="font-size:1.5em;color:var(--alarm)">15 %</span></p>
+        <p>Оператор отримує <strong>585 сповіщень, з яких 495 хибні</strong>. Recall 0,90 виглядав чудово.</p>
+      </div>
+      <div class="card">
+        <h3>Переклад у робочу метрику</h3>
+        <dl class="kv">
+          <dt>0,05</dt><dd>хибної тривоги на кадр</dd>
+          <dt>1,5</dt><dd>хибні тривоги на секунду при 30 fps</dd>
+          <dt>≈ 5 300</dt><dd>хибних тривог на годину відео</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+  <div class="notes">Дати рахувати самим три хвилини, не показуючи відповідь. Потім розкрити. Це найсильніший слайд лекції&nbsp;— не поспішати. Матриця плутанини в цьому вигляді повертається в лекціях 4, 13, 14.</div>
+</section>
+
+<section class="slide" data-block="Блок 4 · Дисбаланс" data-time="14 хв">
+  <h2>Precision залежить від базової частоти, а не лише від моделі</h2>
+  <div class="cols wide-left">
+    <div class="figframe">
+      <svg class="chart" viewBox="0 0 560 300" role="img" aria-label="Precision як функція базової частоти позитивного класу при фіксованому recall 0.9">
+        <path d="M70,40 V250 H520" class="ax" style="fill:none"/>
+        <path d="M70,145 H510" class="grid"/>
+        <polyline points="70,246 180,233 227,218 275,194 338,148 385,110 432,78 495,51" style="fill:none;stroke:var(--alarm);stroke-width:2.6"/>
+        <polyline points="70,231 180,180 227,145 275,110 338,74 385,57 432,48 495,42" style="fill:none;stroke:var(--ok);stroke-width:2.6;stroke-dasharray:6 4"/>
+        <circle cx="227" cy="218" r="5.5" style="fill:var(--alarm)"/>
+        <circle cx="227" cy="145" r="5.5" style="fill:var(--ok)"/>
+        <text x="239" y="234" class="big-lab" style="fill:var(--alarm)">precision 15 %</text>
+        <text x="239" y="136" class="big-lab" style="fill:var(--ok)">precision 50 %</text>
+        <rect x="76" y="56" width="16" height="3" rx="1.5" style="fill:var(--alarm)"/>
+        <text x="99" y="62" style="fill:var(--alarm)">FPR 5 % — поточна модель</text>
+        <rect x="76" y="78" width="16" height="3" rx="1.5" style="fill:var(--ok)"/>
+        <text x="99" y="84" style="fill:var(--ok)">FPR 0,9 % — потрібна модель</text>
+        <text x="70" y="266" text-anchor="middle">0,1 %</text>
+        <text x="180" y="266" text-anchor="middle">0,5 %</text>
+        <text x="227" y="266" text-anchor="middle">1 %</text>
+        <text x="275" y="266" text-anchor="middle">2 %</text>
+        <text x="338" y="266" text-anchor="middle">5 %</text>
+        <text x="385" y="266" text-anchor="middle">10 %</text>
+        <text x="432" y="266" text-anchor="middle">20 %</text>
+        <text x="495" y="266" text-anchor="middle">50 %</text>
+        <text x="60" y="254" text-anchor="end">0</text>
+        <text x="60" y="149" text-anchor="end">0,5</text>
+        <text x="60" y="44" text-anchor="end">1,0</text>
+        <text x="295" y="288" text-anchor="middle" class="big-lab">базова частота цілей (лог. шкала)</text>
+        <text x="22" y="145" transform="rotate(-90 22 145)" text-anchor="middle" class="big-lab">precision</text>
+      </svg>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.8em">
+      <div class="card">
+        <h3>Ключове питання</h3>
+        <p>Якою має бути FPR, щоб при тому самому recall 0,90 precision дорівнював 0,5?</p>
+        <p class="mono" style="font-size:1.05em;color:var(--ok)">≈ 0,9 %</p>
+        <p>Тобто <strong>у 5,5 раза менше</strong>, ніж було. Та сама модель із трохи іншим порогом цього не дасть&nbsp;— потрібна інша модель або інший сенсорний контур.</p>
+      </div>
+      <div class="card bad">
+        <h3>Наслідок, про який забувають</h3>
+        <p>Базова частота на полігоні й у застосуванні різна. <strong>Precision змінюється навіть за незмінної моделі.</strong> Модель, перевірена на датасеті з 20 % цілей, у полі з 0,5 % цілей поводиться зовсім інакше.</p>
+      </div>
+    </div>
+  </div>
+  <div class="notes">Це фундаментальна межа, відома в безпеці з 1999 року як base-rate fallacy: у задачах виявлення саме частота хибних тривог, а не чутливість, обмежує придатність системи (Axelsson, ACM TISSEC 2000). У сучасних оглядах робіт із безпеки цю помилку допускають 77 % авторів.</div>
+</section>
+
+<section class="slide" data-block="Блок 4 · Інструменти" data-time="14 хв">
+  <h2>Інструменти й межі їхньої застосовності</h2>
+  <div class="cols">
+    <div class="card">
+      <h3>Ваги класів / cost-sensitive loss</h3>
+      <p>Найпростіше і найчесніше: задати вартість помилок явно, а не через маніпуляції з вибіркою.</p>
+      <p class="tag t-alarm">руйнує калібрування</p>
+    </div>
+    <div class="card">
+      <h3>Ресемплінг: under / over / SMOTE</h3>
+      <ul class="tight" style="font-size:.9em">
+        <li>SMOTE у високій розмірності інтерполює в майже порожньому просторі;</li>
+        <li>SMOTE на категоріальних ознаках породжує неіснуючі значення;</li>
+        <li>SMOTE <strong>до</strong> розбиття&nbsp;— це витік (кейс 4).</li>
+      </ul>
+      <p class="tag t-alarm">руйнує калібрування</p>
+    </div>
+    <div class="card good">
+      <h3>Підбір порога</h3>
+      <p>Найдешевший і найчастіше забутий інструмент. Модель дає <strong>ранжування</strong>, рішення дає <strong>поріг</strong>.</p>
+      <p style="font-size:.9em">Поріг&nbsp;— продуктова, а не статистична величина: його диктує вартість пропуску проти вартості хибної тривоги і пропускна здатність оператора.</p>
+    </div>
+    <div class="card">
+      <h3>Коли позитивів майже немає</h3>
+      <p>Переформулювати як виявлення аномалій: вчимося на нормі, шукаємо відхилення. Міст до лекції 14.</p>
+    </div>
+  </div>
+  <div class="notes">Порядок дій на практиці: спершу поріг, потім ваги, і тільки якщо це не спрацювало&nbsp;— ресемплінг. Студенти роблять навпаки.</div>
+</section>
+
+<section class="slide" data-block="Блок 4 · Метрики" data-time="14 хв">
+  <h2>ROC-AUC 0.98 і PR-AUC 0.65 — це одна й та сама модель</h2>
+  <div class="cols c2">
+    <div class="figframe" style="max-width:440px;margin-inline:auto">
+      <svg class="chart" viewBox="0 0 300 300" role="img" aria-label="ROC-крива при 1 відсотку позитивів">
+        <path d="M50,40 V260 H280" class="ax" style="fill:none"/>
+        <path d="M50,260 L280,40" class="grid"/>
+        <path d="M50,260 L50.2,164 L51.2,119.6 L52.3,100 L54.6,82 L61.5,61.8 L73,51 L96,44 L165,40.4 L280,40" style="fill:none;stroke:var(--train);stroke-width:2.6"/>
+        <circle cx="61.5" cy="61.8" r="5" style="fill:var(--train)"/>
+        <text x="74" y="78" style="fill:var(--train)">FPR 5 %, recall 90 %</text>
+        <text x="165" y="282" text-anchor="middle" class="big-lab">FPR</text>
+        <text x="20" y="150" transform="rotate(-90 20 150)" text-anchor="middle" class="big-lab">recall</text>
+        <text x="272" y="232" text-anchor="end" style="fill:var(--ink-2);font-weight:600">ROC-AUC ≈ 0,98</text>
+      </svg>
+    </div>
+    <div class="figframe" style="max-width:440px;margin-inline:auto">
+      <svg class="chart" viewBox="0 0 300 300" role="img" aria-label="PR-крива тієї самої моделі при 1 відсотку позитивів">
+        <path d="M50,40 V260 H280" class="ax" style="fill:none"/>
+        <path d="M50,257.8 H280" style="stroke:var(--muted);stroke-width:1;stroke-dasharray:4 4"/>
+        <text x="56" y="252">база 0,01</text>
+        <path d="M61.5,42.2 L99.5,49.7 L150.3,80.7 L196.7,136.1 L217.2,167 L236.1,196.2 L257.2,226.1 L268.5,240.6 L275.8,249.7 L280,257.8" style="fill:none;stroke:var(--alarm);stroke-width:2.6"/>
+        <circle cx="257.2" cy="226.1" r="5" style="fill:var(--alarm)"/>
+        <text x="244" y="206" text-anchor="end" style="fill:var(--alarm)">recall 90 % → precision 15 %</text>
+        <text x="165" y="282" text-anchor="middle" class="big-lab">recall</text>
+        <text x="20" y="150" transform="rotate(-90 20 150)" text-anchor="middle" class="big-lab">precision</text>
+        <text x="272" y="60" text-anchor="end" style="fill:var(--ink-2);font-weight:600">PR-AUC ≈ 0,65</text>
+      </svg>
+    </div>
+  </div>
+  <p class="lead">ROC-AUC оптимістичний при сильному перекосі, бо FPR ділиться на <strong>величезну кількість негативів</strong>: 495 хибних тривог&nbsp;— це «всього 5 %». PR-крива рахує ту саму помилку відносно 100 позитивів і показує 15 %.</p>
+  <div class="notes">Не казати «ROC-AUC поганий». Казати: ROC-AUC відповідає на питання про ранжування і не залежить від базової частоти, PR-AUC&nbsp;— на питання про роботу оператора і залежить. Для рідкісних цілей вам потрібне друге.</div>
+</section>
+
+<section class="slide" data-block="Блок 4 · Метрики" data-time="14 хв">
+  <h2>Метрики, які фіксують робочу точку</h2>
+  <div class="cols">
+    <div class="card">
+      <h3>recall @ фіксована FPR / FPPI</h3>
+      <p>Галузевий стандарт у виявленні: спершу фіксуємо допустимий потік хибних тривог, потім міряємо, скільки цілей знайдено.</p>
+      <p class="mono" style="font-size:.85em">P<sub>d</sub> = 0.875 @ FAR 5 %<br>P<sub>d</sub> = 0.745 @ FAR 1 %</p>
+      <p class="src">акустичне виявлення дрона, arXiv 2606.29589</p>
+    </div>
+    <div class="card">
+      <h3>Те саме у світі LLM-агентів</h3>
+      <p>Детектор промпт-ін'єкцій оцінюють саме так, бо доброякісного трафіку в тисячі разів більше за атаки:</p>
+      <dl class="kv">
+        <dt>94,8 %</dt><dd>атак виявлено @ FPR 1 %</dd>
+        <dt>87,8 %</dt><dd>@ FPR 0,5 %</dd>
+        <dt>65,3 %</dt><dd>@ FPR 0,1 %</dd>
+      </dl>
+      <p class="src">PromptShield, arXiv 2501.15145</p>
+    </div>
+    <div class="card">
+      <h3>precision @ k</h3>
+      <p>Коли оператор фізично перевірить лише k об'єктів за зміну, усе, що нижче k у ранжуванні, не існує. Міряйте те, що він реально побачить.</p>
+    </div>
+    <div class="card">
+      <h3>MCC, balanced accuracy</h3>
+      <p>Коли треба одне число для порівняння моделей і обидва класи важливі. MCC стійкіший до перекосу, ніж F1.</p>
+    </div>
+  </div>
+  <p>Зверніть увагу на форму запису: <strong>метрика без названої робочої точки&nbsp;— це не результат</strong>. «Recall 0.9» без FPR не означає нічого.</p>
+  <div class="notes">У протидії БпЛА поріг диктує не статистика, а оператор: система, налаштована ловити все, генерує стільки нуйсенс-тривог, що реальні починають ігнорувати. Промислова відповідь&nbsp;— підняття порога плюс підтвердження другим сенсором.</div>
+</section>
+
+<!-- ══════════ БЛОК 5 · КАЛІБРУВАННЯ ══════════ -->
+
+<section class="slide" data-block="Блок 5 · Калібрування" data-time="10 хв">
+  <h2>Калібрована ймовірність: означення на пальцях</h2>
+  <p class="lead">Серед усіх випадків, де модель сказала <span class="mono">0,8</span>, позитивних має бути приблизно <strong>80 %</strong>. Не 95 і не 60.</p>
+  <div class="cols wide-left">
+    <div class="figframe">
+      <svg class="chart" viewBox="0 0 560 300" role="img" aria-label="Діаграма надійності до і після калібрування">
+        <path d="M70,40 V250 H510" class="ax" style="fill:none"/>
+        <path d="M70,250 L510,40" style="stroke:var(--muted);stroke-width:1.4;stroke-dasharray:5 4"/>
+        <text x="142" y="240">ідеал</text>
+        <polyline points="224,191 268,177 312,162 356,149 400,135 444,116 488,86" style="fill:none;stroke:var(--alarm);stroke-width:2.6"/>
+        <polyline points="224,181 268,158 312,139 356,116 400,97 444,74 488,55" style="fill:none;stroke:var(--ok);stroke-width:2.6"/>
+        <path d="M400,92.5 V134.5" style="stroke:var(--accent);stroke-width:1.6"/>
+        <circle cx="400" cy="92.5" r="3" style="fill:var(--accent)"/>
+        <circle cx="400" cy="134.5" r="3" style="fill:var(--accent)"/>
+        <text x="392" y="120" text-anchor="end" style="fill:var(--accent)">розрив</text>
+        <text x="286" y="214" style="fill:var(--alarm)" class="big-lab">до: ECE ≈ 0,13</text>
+        <text x="96" y="96" style="fill:var(--ok)" class="big-lab">після temperature scaling:</text>
+        <text x="96" y="114" style="fill:var(--ok)" class="big-lab">ECE ≈ 0,02</text>
+        <text x="70" y="266" text-anchor="middle">0</text>
+        <text x="290" y="266" text-anchor="middle">0,5</text>
+        <text x="510" y="266" text-anchor="middle">1,0</text>
+        <text x="60" y="254" text-anchor="end">0</text>
+        <text x="60" y="149" text-anchor="end">0,5</text>
+        <text x="60" y="44" text-anchor="end">1,0</text>
+        <text x="290" y="288" text-anchor="middle" class="big-lab">впевненість, яку заявила модель</text>
+        <text x="22" y="145" transform="rotate(-90 22 145)" text-anchor="middle" class="big-lab">спостережувана частка позитивів</text>
+      </svg>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.8em">
+      <div class="card">
+        <h3>Крива нижче діагоналі</h3>
+        <p>= <strong>самовпевненість</strong>. Модель заявляє 0,9, а правий лише в 64 % випадків.</p>
+      </div>
+      <div class="card">
+        <h3>Чим міряємо</h3>
+        <dl class="kv">
+          <dt>ECE</dt><dd>середній зважений розрив по бінах</dd>
+          <dt>Brier</dt><dd>reliability − resolution + uncertainty</dd>
+          <dt>log-loss</dt><dd>жорстко карає впевнені помилки</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+  <div class="notes">Розклад Brier варто проговорити: reliability&nbsp;— це калібрування, resolution&nbsp;— здатність розділяти класи, uncertainty&nbsp;— властивість задачі. Калібрування покращує перший доданок і не чіпає другий.</div>
+</section>
+
+<section class="slide" data-block="Блок 5 · Калібрування" data-time="10 хв">
+  <h2>Навіщо це в автономних системах</h2>
+  <div class="cols c2">
+    <div class="card">
+      <h3>Score не закінчується на моделі</h3>
+      <ul class="tight">
+        <li>входить у <strong>трекер</strong> як ймовірність існування об'єкта;</li>
+        <li>входить у <strong>фільтр</strong> як вага вимірювання;</li>
+        <li>входить у <strong>правило рішення за очікуваною вартістю</strong>;</li>
+        <li>входить у <strong>злиття кількох сенсорів</strong> як апостеріорна ймовірність.</li>
+      </ul>
+      <p class="lead" style="font-size:1em;color:var(--alarm)">Некалібрований score ламає все, що стоїть після моделі&nbsp;— мовчки і без помилки в логах.</p>
+    </div>
+    <div class="card">
+      <h3>Типові патології</h3>
+      <dl class="kv">
+        <dt>наївний Баєс</dt><dd>крайня самовпевненість через припущення незалежності</dd>
+        <dt>сучасні нейромережі</dt><dd>самовпевнені тим сильніше, чим більша ємність</dd>
+        <dt>SVM</dt><dd>відступи&nbsp;— не ймовірності; сигмоїдна форма</dd>
+        <dt>випадковий ліс</dt><dd>«боїться» країв: усереднення не дає ні 0, ні 1</dd>
+      </dl>
+    </div>
+  </div>
+  <div class="card flat">
+    <h3>Той самий ефект у LLM</h3>
+    <p>У технічному звіті GPT-4 базова модель на підвибірці MMLU калібрована майже ідеально (<span class="mono">ECE ≈ 0,007</span>), а після RLHF ECE зростає приблизно <strong>на порядок</strong> (<span class="mono">≈ 0,074</span>). Модель навчилася звучати впевнено&nbsp;— і саме тому її <span class="mono">logprob</span> більше не можна класти в правило прийняття рішення без перекалібрування.</p>
+    <p class="src">GPT-4 Technical Report, 2023</p>
+  </div>
+  <div class="notes">Місток для тих, хто робить агентів: будь-який поріг «ескалювати людині / діяти самостійно» стоїть на впевненості моделі. Якщо вона некалібрована, ваш поріг означає не те, що ви думаєте.</div>
+</section>
+
+<section class="slide" data-block="Блок 5 · Калібрування" data-time="10 хв">
+  <h2>Три методи і коли який</h2>
+  <div class="cols">
+    <div class="card">
+      <h3>Platt scaling</h3>
+      <p>Сигмоїда з двома параметрами поверх score. Мало даних, параметрична форма, стійкий.</p>
+      <p class="tag">&lt; 1 000 прикладів калібрування</p>
+    </div>
+    <div class="card">
+      <h3>Ізотонічна регресія</h3>
+      <p>Непараметрична монотонна функція. Гнучкіша, але схильна до перенавчання на малих вибірках.</p>
+      <p class="tag">&gt; кількох тисяч прикладів</p>
+    </div>
+    <div class="card">
+      <h3>Temperature scaling</h3>
+      <p>Один параметр на всі логіти. <strong>Не змінює argmax</strong>, тому accuracy лишається тією самою. Стандарт для нейромереж.</p>
+      <p class="tag">багатокласові мережі</p>
+    </div>
+  </div>
+  <div class="cols c2">
+    <div class="card bad">
+      <h3>Застереження 1</h3>
+      <p>Калібрувати <strong>на окремій вибірці або через CV</strong>, ніколи на train. Калібрування на train дає ідеальну діаграму надійності й нульову користь.</p>
+    </div>
+    <div class="card bad">
+      <h3>Застереження 2</h3>
+      <p>Усі три методи <strong>монотонні</strong>. Тому AUC не змінюється взагалі&nbsp;— а всі порогові метрики й рішення за вартістю змінюються. Хто звітує «після калібрування AUC не виріс, отже, не допомогло»&nbsp;— не зрозумів, що робив.</p>
+    </div>
+  </div>
+  <div class="notes">У scikit-learn це CalibratedClassifierCV з method='sigmoid' або 'isotonic' і cv=5. Підкреслити: вона робить крос-валідацію саме для того, щоб не калібрувати на train.</div>
+</section>
+
+<section class="slide" data-block="Блок 5 · Місток 4 → 5" data-time="10 хв">
+  <h2>Ваги класів і ресемплінг руйнують калібрування</h2>
+  <div class="cols wide-left">
+    <div class="card bad">
+      <h3>Чому</h3>
+      <p>Модель, навчена на збалансованій вибірці або з вагами класів, вчиться під <strong>штучну апріорну ймовірність</strong>. Вона оцінює <span class="mono">P(ціль | x)</span> для світу, де цілей 50 %, а не 1 %.</p>
+      <p>Її виходи більше не є ймовірностями у вашому світі&nbsp;— навіть якщо recall і precision виглядають прийнятно.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.8em">
+      <div class="card good">
+        <h3>Що робити</h3>
+        <ul class="tight">
+          <li>поправка на апріорну ймовірність через шанси (prior correction) &mdash; аналітично, якщо перекіс відомий;</li>
+          <li>або перекалібрування на вибірці з <strong>природною пропорцією</strong> класів;</li>
+          <li>і в обох випадках&nbsp;— заново підібрати поріг.</li>
+        </ul>
+      </div>
+      <div class="card flat">
+        <p style="font-size:.92em">Практичне правило: якщо ви застосували ваги або ресемплінг і після цього використовуєте <span class="mono">predict_proba</span> для чогось, крім ранжування&nbsp;— у вас помилка.</p>
+      </div>
+    </div>
+  </div>
+  <div class="notes">Це та точка, де сходяться блоки 4 і 5. Студенти вчать їх як окремі теми і не бачать конфлікту: перемогли дисбаланс&nbsp;— зламали ймовірності.</div>
+</section>
+
+<!-- ══════════ БЛОК 6 ══════════ -->
+
+<section class="slide" data-block="Блок 6 · Офлайн vs ціль" data-time="5 хв">
+  <h2>Офлайнова метрика — це проксі, і в нього є точки розриву</h2>
+  <div class="flow" style="font-size:.9em;gap:.5em">
+    <span class="step hl">цільова метрика</span><span class="arr">←</span>
+    <span class="step">рішення оператора</span><span class="arr">←</span>
+    <span class="step">агрегація до місії</span><span class="arr">←</span>
+    <span class="step">агрегація до об'єкта</span><span class="arr">←</span>
+    <span class="step">метрика на кадрі</span>
+  </div>
+  <div class="cols">
+    <div class="card"><span class="tag t-alarm">розрив</span><h3>Зсув розподілу</h3><p>Полігон не дорівнює театру дій: інша місцевість, погода, пора року, тактика.</p></div>
+    <div class="card"><span class="tag t-alarm">розрив</span><h3>Замкнена петля</h3><p>Модель впливає на власні входи: оператор дивиться туди, куди вона вказала, і розмічає те, що вона знайшла.</p></div>
+    <div class="card"><span class="tag t-alarm">розрив</span><h3>Рівень агрегації</h3><p>Кадр vs об'єкт vs місія. Пропустити ціль у 9 кадрах із 10 і знайти в одному&nbsp;— це успіх на рівні місії й провал на рівні кадру.</p></div>
+    <div class="card"><span class="tag t-alarm">розрив</span><h3>Асиметрія вартості<br>і людина в петлі</h3><p>Оператор ігнорує систему, яка дає 5 000 хибних тривог на годину. Її фактичний recall&nbsp;— нуль.</p></div>
+  </div>
+  <p class="lead">Правило: спершу формулюємо <strong>цільову метрику</strong> (хибних тривог на годину польоту, частка підтверджених цілей, час оператора до виявлення), і тільки потім обираємо офлайновий проксі&nbsp;— і перевіряємо, чи вони взагалі корелюють.</p>
+  <p class="src">Той самий розрив у бенчмарках LLM-агентів: аудит 17 бенчмарків показав помилки оцінювання, що зміщують результат до 100 % у відносному вираженні — arXiv 2507.02825</p>
+  <div class="notes">Це РН6, він повертається в лекції 12. Тут лише словник і причини розбіжності. Не заглиблюватися&nbsp;— 5 хвилин.</div>
+</section>
+
+<!-- ══════════ БЛОК 7 ══════════ -->
+
+<section class="slide" data-block="Блок 7 · Чек-ліст" data-time="3 хв">
+  <h2>Чек-ліст, за яким я прийматиму захисти</h2>
+  <div class="cols c2">
+    <ol class="tight" style="font-size:.95em">
+      <li>Яке прикладне рішення ухвалюється і яка <strong>цільова метрика</strong>?</li>
+      <li>Що є <strong>одиницею незалежності</strong>? Яка група?</li>
+      <li>Схема розбиття і <strong>чому саме вона</strong>.</li>
+      <li>Тест заморожено. <strong>Скільки разів</strong> на нього дивилися?</li>
+      <li>Увесь препроцесинг усередині <span class="mono">Pipeline</span>, усередині фолду.</li>
+    </ol>
+    <ol class="tight" start="6" style="font-size:.95em">
+      <li>Метрика доречна класовому перекосу, наведено <strong>довірчий інтервал</strong>.</li>
+      <li>Поріг обрано усвідомлено, під вартість помилок.</li>
+      <li>Ймовірності перевірено на <strong>калібрування</strong>.</li>
+      <li>Названо очікувану причину розходження з полем.</li>
+    </ol>
+  </div>
+  <p class="lead">Дев'ять питань. На кожне має бути відповідь одним реченням&nbsp;— у звіті, до захисту, а не на захисті.</p>
+  <div class="notes">Роздатковий матеріал на одну сторінку. Роздати саме тут, у кінці, щоб під час лекції не читали замість слухання.</div>
+</section>
+
+<section class="slide" data-block="Блок 7 · Анонс" data-time="3 хв">
+  <h2>ЛР2 і гачок на лекцію 3</h2>
+  <div class="cols c2">
+    <div class="card">
+      <h3>ЛР2 · дерева рішень + метод головних компонент</h3>
+      <ul class="tight">
+        <li>PCA <strong>лише всередині</strong> <span class="mono">Pipeline</span>;</li>
+        <li>групове розбиття, група названа явно в звіті;</li>
+        <li>метрики з довірчими інтервалами;</li>
+        <li>поріг обґрунтовано вартістю помилок.</li>
+      </ul>
+      <p style="color:var(--alarm)"><strong>Хто зробить PCA до розбиття&nbsp;— отримає завищений результат і мінус на захисті.</strong></p>
+      <p class="mono" style="font-size:.85em">Захист ЛР1 — 24.09</p>
+    </div>
+    <div class="card flat" style="justify-content:center">
+      <h3>Лекція 3</h3>
+      <p class="lead">Ми навчилися <strong>чесно міряти</strong> помилку.<br>Наступного разу&nbsp;— звідки вона береться і чому не можна одночасно мінімізувати зсув і дисперсію.</p>
+    </div>
+  </div>
+  <div class="notes">Закінчити рівно на цьому. Питання&nbsp;— після, у перерві або в чаті курсу.</div>
+</section>
+
+<section class="slide" data-block="Додаток" data-time="">
+  <h2>Джерела прикладів</h2>
+  <div class="cols c2" style="font-size:.9em">
+    <div style="display:flex;flex-direction:column;gap:.5em">
+      <p class="src"><strong>Витік і відтворюваність</strong><br>
+      S. Kapoor, A. Narayanan. Leakage and the reproducibility crisis in machine-learning-based science. <em>Patterns</em>, 2023 — <a href="https://www.cell.com/patterns/fulltext/S2666-3899(23)00159-9">cell.com</a><br>
+      D. Arp et al. Dos and Don'ts of Machine Learning in Computer Security. <em>USENIX Security</em>, 2022 — <a href="https://www.usenix.org/conference/usenixsecurity22/presentation/arp">usenix.org</a><br>
+      S. Axelsson. The base-rate fallacy and the difficulty of intrusion detection. <em>ACM TISSEC</em>, 2000 — <a href="https://dl.acm.org/doi/10.1145/357830.357849">dl.acm.org</a></p>
+      <p class="src"><strong>Групове й часове розбиття у виявленні БпЛА</strong><br>
+      How Much Do RF Drone Benchmarks Overstate? arXiv:2607.01025 — <a href="https://arxiv.org/abs/2607.01025">arxiv.org</a><br>
+      EchoHawk: acoustic pipeline &amp; session-level leakage. arXiv:2606.29589 — <a href="https://arxiv.org/abs/2606.29589">arxiv.org</a><br>
+      Beyond the Performance Illusion (VisDrone, SASP). arXiv:2607.02055 — <a href="https://arxiv.org/abs/2607.02055">arxiv.org</a><br>
+      F. Pendlebury et al. TESSERACT. <em>USENIX Security</em>, 2019 — <a href="https://www.usenix.org/conference/usenixsecurity19/presentation/pendlebury">usenix.org</a></p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.5em">
+      <p class="src"><strong>Хибні кореляції в ATR</strong><br>
+      Discovering and Explaining the Non-Causality of Deep Learning in SAR ATR. arXiv:2304.00668 — <a href="https://arxiv.org/abs/2304.00668">arxiv.org</a><br>
+      Contrastive Feature Alignment for Clutter Robust SAR Recognition. arXiv:2304.01747 — <a href="https://arxiv.org/abs/2304.01747">arxiv.org</a><br>
+      Gwern. The Neural Net Tank Urban Legend — <a href="https://gwern.net/tank">gwern.net/tank</a></p>
+      <p class="src"><strong>Контамінація, калібрування, агенти</strong><br>
+      The SWE-Bench Illusion. arXiv:2506.12286 — <a href="https://arxiv.org/abs/2506.12286">arxiv.org</a><br>
+      H. He, спостереження про Codeforces, 2023 — <a href="https://x.com/cHHillee/status/1635790330854526981">x.com</a><br>
+      OpenAI. GPT-4 Technical Report, 2023 (калібрування до/після RLHF) — <a href="https://arxiv.org/abs/2303.08774">arxiv.org</a><br>
+      PromptShield: Deployable Detection for Prompt Injection. arXiv:2501.15145 — <a href="https://arxiv.org/abs/2501.15145">arxiv.org</a><br>
+      Establishing Best Practices for Building Rigorous Agentic Benchmarks. arXiv:2507.02825 — <a href="https://arxiv.org/abs/2507.02825">arxiv.org</a></p>
+    </div>
+  </div>
+  <div class="notes">Числа на слайдах наведені так, як їх подають першоджерела. Перед лекцією варто перевірити свіжі версії препринтів&nbsp;— частина з них оновлюється.</div>
+</section>
+
+</main>
+<nav class="foot">
+  <button class="btn" id="btn-prev" title="Попередній слайд">←</button>
+  <button class="btn" id="btn-next" title="Наступний слайд">→</button>
+  <span class="count" id="count">1 / 1</span>
+  <span class="spring" style="flex:1"></span>
+  <span class="hint">← → слайди · O список · N нотатки · R розбори · T тема · F повний екран</span>
+</nav>
+<script>
+(function(){
+  var deck = document.getElementById('deck');
+  var slides = Array.prototype.slice.call(deck.querySelectorAll('.slide'));
+  var idx = 0, mode = 'deck';
+
+  slides.forEach(function(s, i){
+    var block = s.getAttribute('data-block') || '';
+    var time = s.getAttribute('data-time') || '';
+    var eb = document.createElement('div');
+    eb.className = 'eyebrow';
+    eb.innerHTML = '<b></b><span></span>';
+    eb.firstChild.textContent = block;
+    eb.lastChild.textContent = (time ? time + ' · ' : '') + 'слайд ' + (i + 1) + ' / ' + slides.length;
+    s.insertBefore(eb, s.firstChild);
+    s.id = 's' + (i + 1);
+  });
+
+  var count = document.getElementById('count');
+  var prog = document.getElementById('prog');
+
+  function render(){
+    if (mode === 'deck') {
+      slides.forEach(function(s, i){ s.hidden = (i !== idx); });
+      deck.scrollTop = 0;
+    } else {
+      slides.forEach(function(s){ s.hidden = false; });
+    }
+    count.textContent = (idx + 1) + ' / ' + slides.length;
+    prog.style.width = ((idx + 1) / slides.length * 100) + '%';
+  }
+
+  function go(n){
+    idx = Math.max(0, Math.min(slides.length - 1, n));
+    if (mode === 'list') {
+      slides[idx].scrollIntoView({block:'start'});
+      count.textContent = (idx + 1) + ' / ' + slides.length;
+      prog.style.width = ((idx + 1) / slides.length * 100) + '%';
+    } else {
+      render();
+    }
+    try { history.replaceState(null, '', '#s' + (idx + 1)); } catch(e) {}
+  }
+
+  document.getElementById('btn-prev').addEventListener('click', function(){ go(idx - 1); });
+  document.getElementById('btn-next').addEventListener('click', function(){ go(idx + 1); });
+
+  var btnMode = document.getElementById('btn-mode');
+  function setMode(m){
+    mode = m;
+    deck.classList.toggle('deck-mode', m === 'deck');
+    deck.classList.toggle('list-mode', m === 'list');
+    btnMode.setAttribute('aria-pressed', m === 'list' ? 'true' : 'false');
+    render();
+    if (m === 'list') slides[idx].scrollIntoView({block:'start'});
+  }
+  btnMode.addEventListener('click', function(){ setMode(mode === 'deck' ? 'list' : 'deck'); });
+
+  var btnNotes = document.getElementById('btn-notes');
+  btnNotes.addEventListener('click', function(){
+    var on = deck.classList.toggle('notes-on');
+    btnNotes.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+
+  var btnTheme = document.getElementById('btn-theme');
+  function currentTheme(){
+    var t = document.documentElement.getAttribute('data-theme');
+    if (t) return t;
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  btnTheme.addEventListener('click', function(){
+    var next = currentTheme() === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('lec2-theme', next); } catch(e) {}
+  });
+  try {
+    var saved = localStorage.getItem('lec2-theme');
+    if (saved === 'dark' || saved === 'light') document.documentElement.setAttribute('data-theme', saved);
+  } catch(e) {}
+
+  deck.addEventListener('click', function(e){
+    var b = e.target.closest ? e.target.closest('.reveal') : null;
+    if (!b) return;
+    var box = b.parentNode;
+    var open = box.classList.toggle('open');
+    b.textContent = open ? 'сховати розбір' : 'показати розбір';
+  });
+
+  document.addEventListener('keydown', function(e){
+    if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'PageDown' || k === ' ') { e.preventDefault(); go(idx + 1); }
+    else if (k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); go(idx - 1); }
+    else if (k === 'Home') { e.preventDefault(); go(0); }
+    else if (k === 'End') { e.preventDefault(); go(slides.length - 1); }
+    else if (k === 'o' || k === 'O' || k === 'щ' || k === 'Щ') { setMode(mode === 'deck' ? 'list' : 'deck'); }
+    else if (k === 'n' || k === 'N' || k === 'т' || k === 'Т') { btnNotes.click(); }
+    else if (k === 't' || k === 'T' || k === 'е' || k === 'Е') { btnTheme.click(); }
+    else if (k === 'r' || k === 'R' || k === 'к' || k === 'К') {
+      slides[idx].querySelectorAll('.case').forEach(function(c){
+        c.classList.add('open');
+        var b = c.querySelector('.reveal');
+        if (b) b.textContent = 'сховати розбір';
+      });
+    }
+    else if (k === 'f' || k === 'F' || k === 'а' || k === 'А') {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+    }
+  });
+
+  var tx = 0, ty = 0;
+  deck.addEventListener('touchstart', function(e){
+    if (e.touches.length !== 1) return;
+    tx = e.touches[0].clientX; ty = e.touches[0].clientY;
+  }, {passive:true});
+  deck.addEventListener('touchend', function(e){
+    if (mode !== 'deck' || !e.changedTouches.length) return;
+    var dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) go(idx + (dx < 0 ? 1 : -1));
+  }, {passive:true});
+
+  var m = /^#s(\d+)$/.exec(location.hash || '');
+  if (m) idx = Math.max(0, Math.min(slides.length - 1, parseInt(m[1], 10) - 1));
+  render();
+})();
+</script>
+</body>
+</html>
