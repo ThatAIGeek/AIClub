@@ -866,11 +866,11 @@ td.mono{font-family:"IBM Plex Mono",monospace}
     </div>
   </div>
   <div class="card">
-    <h3>Демонстрація (ноутбук, наживо)</h3>
+    <h3>Демонстрація (<span class="mono">demo/leakage_demo.ipynb</span>, наживо)</h3>
     <div class="flow">
-      <span class="step">train_test_split(shuffle=True)</span><span class="arr">→</span><span class="step" style="border-color:var(--train);color:var(--train)">≈ 0.95</span>
+      <span class="step">train_test_split(shuffle=True)</span><span class="arr">→</span><span class="step" style="border-color:var(--train);color:var(--train)">≈ 0.93</span>
       <span class="arr" style="margin-left:.8em">|</span>
-      <span class="step">GroupKFold(groups=mission_id)</span><span class="arr">→</span><span class="step" style="border-color:var(--test);color:var(--test)">≈ 0.6</span>
+      <span class="step">GroupKFold(groups=mission_id)</span><span class="arr">→</span><span class="step" style="border-color:var(--test);color:var(--test)">≈ 0.59</span>
     </div>
     <p style="font-size:.88em">Третя клітинка: <span class="mono">StandardScaler + PCA</span> до розбиття і після&nbsp;— різниця в метриці на тих самих даних.</p>
   </div>
